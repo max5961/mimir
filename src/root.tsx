@@ -7,11 +7,13 @@ import { DB } from "./server/db.js";
 preserveScreen();
 
 // Creates/checks for json file in ~/.local/share/quiz
-DB.createDataBase();
+DB.createDataBase({ sample: true });
+export const ROOT_TOPIC = DB.getRootTopic();
 
 const server = app.listen(0);
 
-// @ts-ignore
-const port = server.address().port;
+//@ts-ignore
+export const PORT = server.address().port;
+export const BASE_URL = `http://localhost:${PORT}`;
 
-render(<App port={port} />);
+render(<App />);

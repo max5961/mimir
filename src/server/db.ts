@@ -1,15 +1,46 @@
 import fs from "fs/promises";
-import { execFileSync } from "child_process";
+import { existsSync, writeFileSync, mkdirSync, readFileSync } from "fs";
 import path from "path";
 import os from "os";
-import { Topic, TreeIndex } from "./model.js";
+import { sampleRoot, Topic, TreeIndex } from "./model.js";
+import { randomUUID } from "crypto";
+import assert from "assert";
 
-const DB_DIR = path.join(os.homedir(), ".local", "share", "quiz");
-const DB_PATH = path.join(DB_DIR, "quizData.json");
+export const DB_DIR = path.join(os.homedir(), ".local", "share", "quiz");
+export const DB_PATH = path.join(DB_DIR, "quizData.json");
+export const ROOT_NAME = "$$ROOT";
 
-function createDataBase(): void {
-    execFileSync("mkdir", ["-p", DB_DIR]);
-    execFileSync("touch", [DB_PATH]);
+function createDataBase(opts = { sample: false }): void {
+    const rootTopic: Topic[] = [
+        {
+            id: randomUUID(),
+            name: ROOT_NAME,
+            questions: [],
+            topics: [],
+        },
+    ];
+
+    const fileExists = existsSync(DB_PATH);
+
+    if (!fileExists) {
+        mkdirSync(DB_DIR, { recursive: true });
+        writeFileSync(DB_PATH, JSON.stringify(rootTopic), {
+            encoding: "utf-8",
+        });
+    }
+
+    if (opts.sample) {
+        writeFileSync(DB_PATH, JSON.stringify(sampleRoot), {
+            encoding: "utf-8",
+        });
+    }
+}
+
+function getRootTopic(): Topic {
+    const json = readFileSync(DB_PATH, { encoding: "utf-8" });
+    const data = JSON.parse(json) as Topic[];
+    assert(data[0]);
+    return data[0];
 }
 
 /*
@@ -54,6 +85,7 @@ async function saveDb(root: Topic[]): Promise<void> {
 export const DB = {
     path: DB_PATH,
     createDataBase,
+    getRootTopic,
     openDb,
     saveDb,
 };

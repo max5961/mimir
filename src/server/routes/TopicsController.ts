@@ -3,11 +3,12 @@ import { DB } from "../db.js";
 import { AnyQuestionType, Topic, TreeIndex } from "../model.js";
 import { randomUUID } from "crypto";
 import assert from "assert";
+import { logger } from "phileas";
 
 type Req = express.Request;
 type Res = express.Response;
 
-async function getTopic(
+async function getIndex(
     id: string,
 ): Promise<{ topic: Topic; treeIndex: TreeIndex }> {
     const treeIndex = await DB.openDb();
@@ -22,9 +23,9 @@ async function getTopic(
 }
 
 /* Sends Topic */
-async function getPage(req: Req, res: Res): Promise<void> {
+async function getTopic(req: Req, res: Res): Promise<void> {
     const topicID = req.params.topicID;
-    const topic = await getTopic(topicID);
+    const { topic } = await getIndex(topicID);
 
     res.json(topic);
 }
@@ -34,14 +35,14 @@ async function postQuestion(req: Req, res: Res): Promise<void> {
     const topicID = req.params.topicID as string;
     const newQuestion = req.body.newQuestion as AnyQuestionType;
 
-    const { topic, treeIndex } = await getTopic(topicID);
+    const { topic, treeIndex } = await getIndex(topicID);
 
     newQuestion.id = randomUUID();
     topic.questions.push(newQuestion);
 
     await DB.saveDb(treeIndex.root);
 
-    res.json({ question: newQuestion });
+    res.json(topic);
 }
 
 /* Sends Topic */
@@ -49,7 +50,7 @@ async function postTopic(req: Req, res: Res): Promise<void> {
     const topicID = req.params.topicID as string;
     const newTopicName = req.params.topicName as string;
 
-    const { topic, treeIndex } = await getTopic(topicID);
+    const { topic, treeIndex } = await getIndex(topicID);
 
     topic.topics.push({
         id: randomUUID(),
@@ -68,7 +69,7 @@ async function deleteQuestion(req: Req, res: Res): Promise<void> {
     const topicID: string = req.params.topicID;
     const questionID: string = req.params.questionID;
 
-    const { topic, treeIndex } = await getTopic(topicID);
+    const { topic, treeIndex } = await getIndex(topicID);
 
     topic.questions = topic.questions.filter(
         (question) => question.id !== questionID,
@@ -84,7 +85,7 @@ async function deleteTopic(req: Req, res: Res): Promise<void> {
     const topicID: string = req.params.topicID;
     const subTopicID: string = req.params.subTopicID;
 
-    const { topic, treeIndex } = await getTopic(topicID);
+    const { topic, treeIndex } = await getIndex(topicID);
 
     topic.topics = topic.topics.filter((topic) => topic.id !== subTopicID);
 
@@ -99,7 +100,7 @@ async function putQuestion(req: Req, res: Res): Promise<void> {
     const questionID: string = req.params.questionID;
     const nextQuestion: AnyQuestionType = req.body.nextQuestion;
 
-    const { topic, treeIndex } = await getTopic(topicID);
+    const { topic, treeIndex } = await getIndex(topicID);
 
     const editQuestion = treeIndex.pointers.questions[questionID];
     assert(editQuestion);
@@ -123,7 +124,7 @@ async function putTopic(req: Req, res: Res): Promise<void> {
     const subTopicID: string = req.params.subTopicID;
     const nextName: string = req.body.nextName;
 
-    const { topic, treeIndex } = await getTopic(topicID);
+    const { topic, treeIndex } = await getIndex(topicID);
 
     const editTopic = treeIndex.pointers.topics[subTopicID];
     assert(editTopic);
@@ -136,7 +137,7 @@ async function putTopic(req: Req, res: Res): Promise<void> {
 }
 
 export default {
-    getPage,
+    getTopic,
     postQuestion,
     postTopic,
     deleteQuestion,

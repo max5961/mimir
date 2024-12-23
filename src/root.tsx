@@ -1,19 +1,19 @@
+import dotenv from "dotenv";
 import React from "react";
 import { preserveScreen, render } from "phileas";
-import App from "./App.js";
-import { app } from "./server/server.js";
-import { DB } from "./server/db.js";
+import App from "./views/App.js";
+import { app } from "./server.js";
+import { DataBase } from "./database/DataBase.js";
 
-preserveScreen();
+dotenv.config({ path: `.env.${process.env.NODE_ENV || "production"}` });
 
-// Creates/checks for json file in ~/.local/share/quiz
-DB.createDataBase({ sample: true });
-export const ROOT_TOPIC = DB.getRootTopic();
-
+DataBase.initializeDataBase();
 const server = app.listen(0);
 
-//@ts-ignore
-export const PORT = server.address().port;
-export const BASE_URL = `http://localhost:${PORT}`;
+// @ts-ignore
+export const Port = server.address().port;
+export const BaseURL = `http://localhost:${Port}`;
+export const RootTopic = DataBase.getRootTopic();
 
+preserveScreen();
 render(<App />);

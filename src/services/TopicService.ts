@@ -1,38 +1,31 @@
 import fetch from "node-fetch";
-import { BASE_URL } from "../root.js";
-import { Topic } from "../server/model.js";
-import { logger } from "phileas";
+import { BaseURL } from "../root.js";
+import { Data } from "../routes/topics/topicsController.js";
 
 export default class TopicService {
-    public static async getTopic(topicID: string): Promise<Topic> {
-        const response = await fetch(`${BASE_URL}/topics/${topicID}`, {
+    public static async getTopic(topicID: string) {
+        const response = await fetch(`${BaseURL}/topics/${topicID}`, {
             method: "GET",
             headers: { "Content-Type": "application/json" },
         });
 
         if (!response.ok) {
-            throw new Error(String(response.status));
+            return response.status;
         }
 
-        return (await response.json()) as Topic;
+        return (await response.json()) as Data;
     }
 
-    public static async postTopic(
-        topicID: string,
-        topicName: string,
-    ): Promise<Topic> {
-        const response = await fetch(
-            `${BASE_URL}/topics/${topicID}/topics/${topicName}`,
-            {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-            },
-        );
+    public static async postTopic(topicID: string, topicName: string) {
+        const response = await fetch(`${BaseURL}/topics/${topicID}/topics/${topicName}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+        });
 
         if (!response.ok) {
-            throw new Error(String(response.status));
+            return response.status;
         }
 
-        return (await response.json()) as Topic;
+        return (await response.json()) as Data;
     }
 }

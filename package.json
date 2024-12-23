@@ -4,13 +4,16 @@
     "description": "",
     "main": "dist/root.js",
     "scripts": {
-        "start": "tsc && node ./dist/root.js"
+        "start": "tsc && NODE_ENV=development node ./dist/root.js",
+        "test": "tsc && NODE_ENV=test npx vitest",
+        "watch": "tsc --watch"
     },
     "keywords": [],
     "author": "",
     "license": "ISC",
     "dependencies": {
         "@types/react": "^19.0.2",
+        "dotenv": "^16.4.7",
         "express": "^4.21.2",
         "express-async-handler": "^1.2.0",
         "node-fetch": "^3.3.2",
@@ -23,7 +26,8 @@
         "@types/express": "^5.0.0",
         "@types/node": "^22.10.2",
         "prettier": "^3.4.2",
-        "typescript": "^5.7.2"
+        "typescript": "^5.7.2",
+        "vitest": "^2.1.8"
     },
     "type": "module"
 }

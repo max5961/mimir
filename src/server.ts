@@ -1,5 +1,5 @@
 import express from "express";
-import { topicsRoute } from "./routes/topicsRoute.js";
+import { topicsRoute } from "./routes/topics/topicsRoute.js";
 import { logger } from "phileas";
 
 export const app = express();
@@ -27,3 +27,15 @@ app.use((req, res, next) => {
 });
 
 app.use("/topics", topicsRoute);
+
+app.use((req, res, next) => {
+    res.status(404).send("Invalid URL");
+});
+
+app.use((err, req, res, next) => {
+    if (err instanceof Error) {
+        res.status(500).send(err.message);
+    } else {
+        res.status(500).send(err);
+    }
+});

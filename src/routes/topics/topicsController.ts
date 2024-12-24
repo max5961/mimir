@@ -6,7 +6,7 @@ import { randomUUID } from "crypto";
 type Req = express.Request;
 type Res = express.Response;
 
-export type Data = {
+export type TopicsData = {
     curr: Topic;
     parent: Topic | null;
     root: Topic;
@@ -35,7 +35,7 @@ function buildTopicPath(topicIndex: TopicIndex, id: string): string {
     return path.reverse().join("/").replace(RootTopicName, "");
 }
 
-async function getTopicDataById(id: string): Promise<Data | null> {
+async function getTopicDataById(id: string): Promise<TopicsData | null> {
     const topicIndex = await DataBase.openDb();
 
     const topic = topicIndex.topics[id];

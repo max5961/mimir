@@ -3,6 +3,7 @@ import { existsSync, writeFileSync, mkdirSync, readFileSync } from "fs";
 import { sampleRoot, Topic, TopicIndex } from "../models/TopicModel.js";
 import { randomUUID } from "crypto";
 import { DataBasePath, DataBaseDir } from "../loadEnv.js";
+import { logger } from "phileas";
 
 export const RootTopicName = "$$ROOT";
 
@@ -64,7 +65,7 @@ function initializeDataBase(): void {
         });
     }
 
-    if (process.env.development) {
+    if (process.env.NODE_ENV === "development") {
         writeFileSync(DataBasePath, JSON.stringify(sampleRoot), {
             encoding: "utf-8",
         });
@@ -72,7 +73,8 @@ function initializeDataBase(): void {
 }
 
 /*
- * Synchronously gets a pointer to the root
+ * Synchronously gets a pointer to the root so that we have the initialization
+ * data before the app first renders.
  * */
 function getRootTopic(): Topic {
     const json = readFileSync(DataBasePath, { encoding: "utf-8" });

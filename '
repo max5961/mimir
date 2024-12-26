@@ -25,7 +25,7 @@ export namespace TopicResponse {
 }
 
 function topicNotFound(id: string): { message: string } {
-    return { message: `TopicModel with id '${id}' not found.` };
+    return { message: `TopicModel with '${id}' not found.` };
 }
 
 function sendErr(next: Next, topicID: string): void {
@@ -85,11 +85,11 @@ async function postTopics(req: Req, res: Res, next: Next): Promise<void> {
 }
 
 async function moveTopic(req: Req, res: Res, next: Next): Promise<void> {
-    const cwdID = req.params.cwdID as string;
+    const topicID = req.params.topicID as string;
     const subTopicID = req.params.subTopicID as string;
     let dest = req.body.destination as string;
 
-    let startDestID = cwdID;
+    let startDestID = topicID;
     if (dest.startsWith("~/") || dest.startsWith("/root/")) {
         startDestID = RootTopic.id;
         dest = dest.replace(/^~\/|^\/root\//, "");
@@ -102,64 +102,41 @@ async function moveTopic(req: Req, res: Res, next: Next): Promise<void> {
     const fileData = await TopicService.getIndexableFileData();
 
     const rootTopic = fileData.root;
-    const currentTopic = fileData.topics[cwdID]?.topic;
-    const parentTopic = fileData.topics[cwdID]?.parent;
-    if (!currentTopic) {
-        throw new Error("Cant find currentTopic");
-    }
+    const currentTopic = fileData.topics[topicID]?.topic;
+    const parentTopic = fileData.topics[topicID]?.parent;
     const subTopic = fileData.topics[subTopicID]?.topic;
-    if (!subTopic) {
-        throw new Error("Can't find subTopic");
-    }
-    const destTarget = fileData.topics[startDestID]?.topic;
-    if (!destTarget) {
-        throw new Error("Can't find destTarget");
+    const targetTopic = fileData.topics[startDestID]?.topic;
+
+    if (!currentTopic || !subTopic || !targetTopic) {
+        return sendErr(next, topicID);
     }
 
-    let curr: TopicModel = destTarget;
+    let curr = targetTopic;
     const path = dest.split("/");
     for (let i = 0; i < path.length; ++i) {
         const name = path[i];
 
-        if (name === "..") {
-            const nextCurr = fileData.topics[curr.id].parent;
-            if (nextCurr) {
-                curr = nextCurr;
-                continue;
-            } else {
-                throw new Error("Invalid file path");
-            }
-        }
-
         const nextTopic = curr.subTopics.find((subTopic) => subTopic.name === name);
         if (!nextTopic && i < path.length - 1) {
-            return sendErr(next, cwdID);
+            return sendErr(next, topicID);
         } else if (!nextTopic) {
-            if (name && name !== ".") {
-                subTopic.name = name;
+            if (name !== ".") {
+                targetTopic.name = name;
             }
-
-            // cannot move a directory into a subdirectory of itself (mv foo foo)
-        } else if (nextTopic.id === subTopic.id) {
-            break;
         } else {
             curr = nextTopic;
         }
     }
 
-    // If the current pointer has actually been moved, push into the destination
-    // subTopics array.  Otherwise, the name has just been changed which was done
-    // in the for loop.
-    if (curr !== destTarget) {
-        currentTopic.subTopics = currentTopic.subTopics.filter(
-            (topic) => topic.id !== subTopicID,
-        );
-        curr.subTopics.push(subTopic);
-    }
+    currentTopic.subTopics = currentTopic.subTopics.filter((topic) => {
+        return topic.id !== subTopicID;
+    });
+
+    targetTopic.subTopics.push(targetTopic);
 
     await DataBase.saveDb(rootTopic);
 
-    const topicData = await TopicService.getTopicDataById(cwdID);
+    const topicData = await TopicService.getTopicDataById(topicID);
 
     res.status(200).json({
         currentTopic: currentTopic,

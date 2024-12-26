@@ -1,22 +1,23 @@
 import fs from "fs/promises";
 import { existsSync, writeFileSync, mkdirSync, readFileSync } from "fs";
-import { sampleRoot, Topic, TopicIndex } from "../models/TopicModel.js";
 import { randomUUID } from "crypto";
-import { DataBasePath, DataBaseDir } from "../loadEnv.js";
-import { logger } from "phileas";
+import { DataBasePath, DataBaseDir, NodeEnv } from "../env/Env.js";
+import { TopicModel } from "../models/TopicModel.js";
+import { IndexableFileData } from "./IndexableFileData.js";
+import { sampleRoot } from "../models/sampleTopicModel.js";
 
 export const RootTopicName = "$$ROOT";
 
 /*
- * Reads the json file (Topic) and converts it into a TopicIndex object
+ * Reads the json file (Topic) and converts it into a TopicIndexModel object
  * */
-async function openDb(): Promise<TopicIndex> {
+async function openDb(): Promise<IndexableFileData> {
     const contents = await fs.readFile(DataBasePath, { encoding: "utf-8" });
-    const root = JSON.parse(contents) as Topic;
+    const root = JSON.parse(contents) as TopicModel;
 
-    const buildTopicIndex = (
-        root: Topic,
-        index: TopicIndex = { topics: {}, questions: {}, root: root },
+    const buildIndex = (
+        root: TopicModel,
+        index: IndexableFileData = { topics: {}, questions: {}, root: root },
     ) => {
         if (!index.topics[root.id]) {
             index.topics[root.id] = { parent: null, topic: root };
@@ -26,21 +27,21 @@ async function openDb(): Promise<TopicIndex> {
             index.questions[question.id] = question;
         });
 
-        root.topics.forEach((topic) => {
-            index.topics[topic.id] = { topic: topic, parent: root };
-            buildTopicIndex(topic, index);
+        root.subTopics.forEach((subTopic) => {
+            index.topics[subTopic.id] = { topic: subTopic, parent: root };
+            buildIndex(subTopic, index);
         });
 
         return index;
     };
 
-    return buildTopicIndex(root);
+    return buildIndex(root);
 }
 
 /*
  * Save just the root.  The indexed tree isn't written.
  * */
-async function saveDb(root: Topic): Promise<void> {
+async function saveDb(root: TopicModel): Promise<void> {
     const data = JSON.stringify(root, null, 4);
     return await fs.writeFile(DataBasePath, data, { encoding: "utf-8" });
 }
@@ -49,11 +50,11 @@ async function saveDb(root: Topic): Promise<void> {
  * Checks for/creates a json file to read and write data from.
  * */
 function initializeDataBase(): void {
-    const rootTopic: Topic = {
+    const rootTopic: TopicModel = {
         id: randomUUID(),
         name: RootTopicName,
         questions: [],
-        topics: [],
+        subTopics: [],
     };
 
     const fileExists = existsSync(DataBasePath);
@@ -65,7 +66,7 @@ function initializeDataBase(): void {
         });
     }
 
-    if (process.env.NODE_ENV === "development") {
+    if (NodeEnv === "development") {
         writeFileSync(DataBasePath, JSON.stringify(sampleRoot), {
             encoding: "utf-8",
         });
@@ -76,9 +77,9 @@ function initializeDataBase(): void {
  * Synchronously gets a pointer to the root so that we have the initialization
  * data before the app first renders.
  * */
-function getRootTopic(): Topic {
+function getRootTopic(): TopicModel {
     const json = readFileSync(DataBasePath, { encoding: "utf-8" });
-    const root = JSON.parse(json) as Topic;
+    const root = JSON.parse(json) as TopicModel;
     return root;
 }
 

@@ -4,30 +4,38 @@ import {
     createSelector,
     PayloadAction,
 } from "@reduxjs/toolkit";
-import { ExplorerState, NewTopic } from "./explorerTypes.js";
-import Fetch from "./ExplorerFetch.js";
+import { ExplorerState } from "./explorerTypes.js";
+import API from "./API.js";
 import { RootState } from "../../store/store.js";
-import { Question, Topic } from "../../../models/TopicModel.js";
+import { TopicResponse } from "../../../routes/topics/topicsController.js";
 
 const name = "explorer";
 
 const initialState: ExplorerState = {
-    showPreview: true,
-    parentTopicIndex: 0,
-    previewTopic: null,
-    previewQuestion: null,
-    curr: { id: "", name: "", topics: [], questions: [] },
-    parent: { id: "", name: "", topics: [], questions: [] },
-    root: { id: "", name: "", topics: [], questions: [] },
-    path: "",
+    idxTrail: [],
+    currentIndex: 0,
+    topicData: {
+        currentPath: "",
+        currentTopic: { id: "", name: "", subTopics: [], questions: [] },
+        parentTopic: null,
+    },
+    nextColumn: {
+        nextTopic: null,
+        nextQuestion: null,
+        showNextColumn: true,
+    },
 };
 
-const createTopicLoader = (type: string) => {
+const generateTopicDataThunk = (type: string) => {
     return createAsyncThunk(
         `${name}/${type}`,
-        async (id: string, { rejectWithValue }) => {
+        async (
+            { id, idxTrail }: { id: string; idxTrail?: number[] },
+            { rejectWithValue },
+        ) => {
             try {
-                return await Fetch.getTopic(id);
+                const data = await API.getTopicData(id);
+                return { ...data, idxTrail };
             } catch (err) {
                 rejectWithValue(err);
             }
@@ -35,14 +43,42 @@ const createTopicLoader = (type: string) => {
     );
 };
 
-export const loadTopic = createTopicLoader("loadTopic");
-export const loadNextTopic = createTopicLoader("loadNextTopic");
-export const loadPrevTopic = createTopicLoader("loadPrevTopic");
+type TopicDataPayload =
+    | (TopicResponse.GetTopicData & { idxTrail?: number[] })
+    | undefined;
+export const getTopicData = generateTopicDataThunk("getTopicData");
+export const getNextTopicData = generateTopicDataThunk("getNextTopicData");
+export const getPrevTopicData = generateTopicDataThunk("getPrevTopicData");
 
 export const postTopic = createAsyncThunk(
     `${name}/postTopic`,
-    async (newTopic: NewTopic) => {
-        //
+    async (
+        { names, currentTopicID }: { names: string[]; currentTopicID: string },
+        { rejectWithValue },
+    ) => {
+        try {
+            return await API.postTopics(currentTopicID, names);
+        } catch (err) {
+            rejectWithValue(err);
+        }
+    },
+);
+
+export const moveTopic = createAsyncThunk(
+    `${name}/moveTopic`,
+    async (
+        {
+            cwdID,
+            targetID,
+            destination,
+        }: { cwdID: string; targetID: string; destination: string },
+        { rejectWithValue },
+    ) => {
+        try {
+            return await API.moveTopic(cwdID, targetID, destination);
+        } catch (err) {
+            rejectWithValue(err);
+        }
     },
 );
 
@@ -50,123 +86,142 @@ const explorerSlice = createSlice({
     name: name,
     initialState: initialState,
     reducers: {
-        updateParentTopicIndex: (state: ExplorerState, action: PayloadAction<number>) => {
-            state.parentTopicIndex = action.payload;
-        },
-        updatePreview: (
+        updateNextColumn: (
             state: ExplorerState,
-            action: PayloadAction<{
-                topicPreview: null | Topic;
-                questionPreview: null | Question;
-            }>,
+            action: PayloadAction<
+                Pick<ExplorerState["nextColumn"], "nextQuestion" | "nextTopic">
+            >,
         ) => {
-            state.previewTopic = action.payload.topicPreview;
-            state.previewQuestion = action.payload.questionPreview;
+            state.nextColumn.nextTopic = action.payload.nextTopic;
+            state.nextColumn.nextQuestion = action.payload.nextQuestion;
         },
-        updateShowPreview: (state: ExplorerState, action: PayloadAction<boolean>) => {
-            state.showPreview = action.payload;
+        updateIdxTrail: (state: ExplorerState, action: PayloadAction<number[]>) => {
+            state.idxTrail = action.payload;
+        },
+        updateCurrentIndex: (state: ExplorerState, action: PayloadAction<number>) => {
+            state.currentIndex = action.payload;
         },
     },
     extraReducers(builder) {
         builder
-            .addCase(loadTopic.fulfilled, (state, { payload }) => {
-                if (!payload) return;
+            .addCase(
+                getTopicData.fulfilled,
+                (state: ExplorerState, action: PayloadAction<TopicDataPayload>) => {
+                    const { payload } = action;
+                    if (!payload) return;
 
-                state.root = payload.root;
-                state.curr = payload.curr;
-                state.parent = payload.parent;
-                state.path = payload.path;
+                    const { idxTrail, ...topicData } = payload;
 
-                state.previewTopic = null;
-                state.previewQuestion = null;
-                if (payload.curr.topics.length) {
-                    state.previewTopic = payload.curr.topics[0];
-                } else if (payload.curr.questions.length) {
-                    state.previewQuestion = payload.curr.questions[0];
-                }
-            })
-            .addCase(loadNextTopic.fulfilled, (state, action) => {
-                //
-            })
-            .addCase(loadPrevTopic.fulfilled, (state, action) => {
-                //
-            })
-            .addCase(postTopic.fulfilled, (state) => {
-                //
-            });
+                    state.topicData = topicData;
+                },
+            )
+            .addCase(
+                getNextTopicData.fulfilled,
+                (state: ExplorerState, action: PayloadAction<TopicDataPayload>) => {
+                    const { payload } = action;
+                    if (!payload) return;
+
+                    const { idxTrail, ...topicData } = payload;
+
+                    state.topicData = topicData;
+                    state.idxTrail = idxTrail ?? state.idxTrail;
+                },
+            )
+            .addCase(
+                getPrevTopicData.fulfilled,
+                (state: ExplorerState, action: PayloadAction<TopicDataPayload>) => {
+                    const { payload } = action;
+                    if (!payload) return;
+
+                    const { idxTrail, ...topicData } = payload;
+
+                    state.topicData = topicData;
+                    state.idxTrail = idxTrail ?? state.idxTrail;
+                },
+            )
+            .addCase(
+                postTopic.fulfilled,
+                (
+                    state: ExplorerState,
+                    action: PayloadAction<TopicResponse.PostTopics | undefined>,
+                ) => {
+                    const { payload } = action;
+                    if (!payload) return;
+
+                    state.topicData = payload;
+                },
+            )
+            .addCase(
+                moveTopic.fulfilled,
+                (
+                    state: ExplorerState,
+                    action: PayloadAction<TopicResponse.PostTopics | undefined>,
+                ) => {
+                    const { payload } = action;
+                    if (!payload) return;
+
+                    state.topicData = payload;
+                },
+            );
     },
 });
 
-export const selectExplorer = createSelector(
+export const selectCurrentColumn = createSelector(
     [
-        (state: RootState) => state.explorer.path,
-        (state: RootState) => state.explorer.previewTopic,
-        (state: RootState) => state.explorer.showPreview,
+        (state: RootState) => state.explorer.topicData.currentTopic,
+        (state: RootState) => state.explorer.topicData.currentPath,
+        (state: RootState) => state.explorer.topicData.parentTopic?.id ?? null,
+        (state: RootState) => state.explorer.idxTrail,
     ],
-    (path, previewTopic, showPreview) => {
-        return {
-            topicPath: path,
-            topicPreview: previewTopic,
-            showPreview: showPreview,
-        };
+    (currentTopic, currentPath, parentID, idxTrail) => {
+        return { currentTopic, currentPath, parentID, idxTrail };
     },
 );
 
 export const selectParentColumn = createSelector(
     [
-        (state: RootState) => state.explorer.parent,
-        (state: RootState) => state.explorer.curr,
+        (state: RootState) => state.explorer.topicData.parentTopic,
+        (state: RootState) => state.explorer.idxTrail,
     ],
-    (parent, curr) => {
-        return {
-            parentTopic: parent,
-            currTopic: curr,
-        };
+    (parentTopic, idxTrail) => {
+        return { parentTopic, idxTrail };
     },
 );
 
-export const selectCurrentColumn = createSelector(
+export const selectNextColumn = createSelector(
     [
-        (state: RootState) => state.explorer.parent,
-        (state: RootState) => state.explorer.curr,
-        (state: RootState) => state.explorer.parentTopicIndex,
+        (state: RootState) => state.explorer.nextColumn.nextTopic,
+        (state: RootState) => state.explorer.nextColumn.nextQuestion,
+        (state: RootState) => state.explorer.nextColumn.showNextColumn,
     ],
-    (parent, curr, parentTopicIndex) => {
+    (nextTopic, nextQuestion, showNextColumn) => {
         return {
-            parent: parent,
-            current: curr,
-            parentTopicIndex: parentTopicIndex,
+            nextTopic,
+            nextQuestion,
+            showNextColumn,
         };
     },
 );
 
-export const selectPreviewColumn = createSelector(
+export const selectTopBar = createSelector(
+    [(state: RootState) => state.explorer.topicData.currentPath],
+    (currentPath) => {
+        return {
+            currentPath,
+        };
+    },
+);
+
+export const selectCommandLine = createSelector(
     [
-        (state: RootState) => state.explorer.previewTopic,
-        (state: RootState) => state.explorer.previewQuestion,
-        (state: RootState) => state.explorer.showPreview,
+        (state: RootState) => state.explorer.topicData.currentTopic,
+        (state: RootState) => state.explorer.currentIndex,
     ],
-    (topic, question, showPreview) => {
-        return {
-            topic,
-            question,
-            showPreview,
-        };
+    (currentTopic, currentIndex) => {
+        return { currentTopic, currentIndex };
     },
 );
 
-export const selectParentTopicIndex = (state: RootState) => {
-    return state.explorer.parentTopicIndex;
-};
-
-export const selectRoot = (state: RootState) => {
-    return state.explorer.root;
-};
-
-export const selectPath = (state: RootState) => {
-    return state.explorer.path;
-};
-
-export const { updateParentTopicIndex, updatePreview, updateShowPreview } =
+export const { updateNextColumn, updateIdxTrail, updateCurrentIndex } =
     explorerSlice.actions;
 export default explorerSlice.reducer;

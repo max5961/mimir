@@ -1,19 +1,22 @@
-import { Question, Topic } from "../../../models/TopicModel.js";
-import { TopicsData } from "../../../routes/topics/topicsController.js";
 import { useList } from "phileas";
+import { TopicResponse } from "../../../routes/topics/topicsController.js";
+import { TopicModel } from "../../../models/TopicModel.js";
+import { QuestionModel } from "../../../models/QuestionModel.js";
 
 export type SerializableListView = Omit<
     ReturnType<typeof useList>["listView"],
     "_control" | "_setItems"
 >;
 
-// export type Preview = Topic | Question | null;
-
-export type ExplorerState = TopicsData & {
-    parentTopicIndex: number;
-    previewTopic: Topic | null;
-    previewQuestion: Question | null;
-    showPreview: boolean;
+export type ExplorerState = {
+    idxTrail: number[];
+    currentIndex: number;
+    topicData: TopicResponse.GetTopicData;
+    nextColumn: {
+        nextTopic: TopicModel | null;
+        nextQuestion: QuestionModel | null;
+        showNextColumn: boolean;
+    };
 };
 
-export type NewTopic = Omit<Topic, "id">;
+export type NewTopic = Omit<TopicModel, "id">;

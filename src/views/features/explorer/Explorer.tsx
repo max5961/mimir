@@ -1,322 +1,324 @@
-import React, { useEffect } from "react";
-import { Box, HorizontalLine, List, Styles, Text, useKeymap, useList } from "phileas";
+import React, { useEffect, useRef } from "react";
+import {
+    Box,
+    HorizontalLine,
+    List,
+    logger,
+    Styles,
+    Text,
+    useKeymap,
+    useList,
+} from "phileas";
 import { useAppDispatch, useAppSelector } from "../../store/store.js";
 import {
-    selectExplorer,
-    updateParentTopicIndex,
-    loadTopic,
-    selectParentColumn,
+    getNextTopicData,
+    getPrevTopicData,
+    getTopicData,
     selectCurrentColumn,
-    updatePreview,
-    selectPreviewColumn,
-    updateShowPreview,
+    selectNextColumn,
+    selectParentColumn,
+    selectTopBar,
+    updateCurrentIndex,
+    updateIdxTrail,
+    updateNextColumn,
 } from "./explorerSlice.js";
-import { Question, Topic } from "../../../models/TopicModel.js";
+import { CommandLine } from "../../CommandLine/CommandLine.js";
+import { QuestionModel } from "../../../models/QuestionModel.js";
+import { TopicModel } from "../../../models/TopicModel.js";
 
 const BASE_COLOR = "green";
 
-const stretchBox: Styles["Box"] = {
-    height: "100",
-    width: "100",
+const maxDim: Styles["Box"] = { height: "100", width: "100" };
+
+const columnBox: Styles["Box"] = {
+    ...maxDim,
     borderStyle: "round",
     borderColor: BASE_COLOR,
+    flexDirection: "column",
 };
 
 export function Explorer(): React.ReactNode {
-    const dispatch = useAppDispatch();
-    const { topicPath, topicPreview, showPreview } = useAppSelector(selectExplorer);
-
-    const { useEvent } = useKeymap({ togglePreview: { input: "p" } });
-    useEvent("togglePreview", () => {
-        dispatch(updateShowPreview(!showPreview));
-    });
-
-    let currentColumnPath = topicPath;
-    if (topicPreview) {
-        if (!currentColumnPath.endsWith("/")) {
-            currentColumnPath += "/";
-        }
-        currentColumnPath += topicPreview.name;
-    }
-
     return (
-        <Box height="100" width="100" flexDirection="column">
-            <Box
-                width="100"
-                height={3}
-                flexShrink={0}
-                borderStyle="round"
-                borderColor={BASE_COLOR}
-            >
-                <Text color={BASE_COLOR}>{topicPath}</Text>
+        <Box styles={maxDim} flexDirection="column">
+            <TopBar />
+            <Box styles={maxDim}>
+                <ParentColumn />
+                <CurrentColumn />
+                <NextColumn />
             </Box>
-            <Box styles={{ ...stretchBox, borderStyle: undefined }}>
-                <Box styles={stretchBox} flexShrink={1.25}>
-                    <ParentColumn />
-                </Box>
-                <Box
-                    styles={stretchBox}
-                    titleTopLeft={{ title: currentColumnPath, color: BASE_COLOR }}
-                >
-                    <CurrentColumn />
-                </Box>
-                {showPreview && (
-                    <Box styles={stretchBox}>
-                        <PreviewColumn />
-                    </Box>
-                )}
+            <Box height={1} width="100">
+                <CommandLine />
             </Box>
         </Box>
     );
 }
 
 function ParentColumn(): React.ReactNode {
-    const dispatch = useAppDispatch();
-    const { parentTopic, currTopic } = useAppSelector(selectParentColumn);
+    const { parentTopic, idxTrail } = useAppSelector(selectParentColumn);
 
-    const itemsLength =
-        (parentTopic?.topics.length ?? 0) + (parentTopic?.questions.length ?? 0);
+    const subTopicsLength = parentTopic?.subTopics.length ?? 0;
+    const questionsLength = parentTopic?.questions.length ?? 0;
+    const itemsLength = subTopicsLength + questionsLength;
 
-    const { listView, control } = useList(itemsLength, {
+    // Will always have at least one parent topic (display dummy root);
+    const { listView } = useList(itemsLength ? itemsLength : 1, {
         navigation: "none",
         centerScroll: true,
     });
 
     useEffect(() => {
-        // Shift index to the one that got us here
-        if (
-            parentTopic &&
-            parentTopic.topics[control.currentIndex]?.id !== currTopic.id
-        ) {
-            for (let i = 0; i < parentTopic.topics.length; ++i) {
-                const stepTopic = parentTopic.topics[i];
-                if (stepTopic.id === currTopic.id) {
-                    if (control.currentIndex !== i) {
-                        control.goToIndex(i);
-                        dispatch(updateParentTopicIndex(i));
-                    }
-                }
-            }
-        }
+        //
     }, [parentTopic?.id]);
 
-    // Return dummy root topic if no parent
-    if (!parentTopic) {
-        return (
-            <Box height={1} width="100">
-                <TopicListItem
-                    topic={{
-                        topics: [],
-                        questions: [],
-                        id: "foobar",
-                        name: "root",
-                    }}
-                    isFocus
-                    dim
-                />
-            </Box>
-        );
-    }
+    const listIndex = idxTrail[idxTrail.length - 1];
+
+    const content = !parentTopic ? (
+        <List listView={listView}>
+            <TopicListItem
+                topic={{
+                    subTopics: [],
+                    questions: [],
+                    id: "root",
+                    name: "root",
+                }}
+                isFocus
+                dim
+            />
+        </List>
+    ) : (
+        <List listView={listView} scrollbar={{ color: BASE_COLOR }}>
+            {parentTopic.subTopics.map((topic, idx) => {
+                const isFocus = listIndex === idx;
+                return (
+                    <TopicListItem key={topic.id} topic={topic} isFocus={isFocus} dim />
+                );
+            })}
+            {parentTopic.questions.map((question) => {
+                return (
+                    <QuestionListItem
+                        key={question.id}
+                        question={question}
+                        isFocus={false}
+                        dim
+                    />
+                );
+            })}
+        </List>
+    );
 
     return (
-        <Box height="100" width="100">
-            <List listView={listView} scrollbar={{ color: BASE_COLOR }}>
-                {parentTopic.topics.map((topic, idx) => {
-                    const isFocus = control.currentIndex === idx;
-                    return (
-                        <TopicListItem
-                            key={topic.id}
-                            topic={topic}
-                            isFocus={isFocus}
-                            dim
-                        />
-                    );
-                })}
-                {parentTopic.questions.map((question, idx) => {
-                    const isFocus =
-                        idx === control.currentIndex - parentTopic.topics.length;
-                    return (
-                        <QuestionListItem
-                            key={question.id}
-                            question={question}
-                            isFocus={isFocus}
-                            dim
-                        />
-                    );
-                })}
-            </List>
+        <Box styles={columnBox} flexShrink={1.25}>
+            {content}
         </Box>
     );
 }
 
 function CurrentColumn(): React.ReactNode {
     const dispatch = useAppDispatch();
-    const { current, parent, parentTopicIndex } = useAppSelector(selectCurrentColumn);
+    const { currentTopic, currentPath, parentID, idxTrail } =
+        useAppSelector(selectCurrentColumn);
 
-    const { listView, control } = useList(
-        current.topics.length + current.questions.length,
-    );
+    const topicsCount = currentTopic.subTopics.length ?? 0;
+    const questionsCount = currentTopic.questions.length ?? 0;
+    const itemsCount = topicsCount + questionsCount;
 
-    const { useEvent } = useKeymap({
-        loadNextTopic: [{ input: "l" }, { key: "return" }],
-        loadParentTopic: [{ input: "h" }, { key: "backspace" }],
-    });
+    const { listView, control } = useList(itemsCount);
 
-    useEvent("loadNextTopic", () => {
-        if (control.currentIndex < current.topics.length) {
-            const nextTopic = current.topics[control.currentIndex];
-
-            dispatch(loadTopic(nextTopic.id));
-            control.goToIndex(0);
-        }
-    });
-
-    useEvent("loadParentTopic", () => {
-        if (parent) {
-            dispatch(loadTopic(parent.id));
-            control.goToIndex(parentTopicIndex);
-        }
-    });
+    const nextTopic: TopicModel | null =
+        currentTopic.subTopics[control.currentIndex] ?? null;
+    const nextQuestion: QuestionModel | null =
+        currentTopic.questions[control.currentIndex - topicsCount] ?? null;
 
     useEffect(() => {
-        // Since topics render first, only one of these can be in range
-        const topicsIdx = control.currentIndex;
-        const questionsIdx = control.currentIndex - current.topics.length;
-
-        const topicPreview = current.topics[topicsIdx] ?? null;
-        const questionPreview = current.questions[questionsIdx] ?? null;
-
-        dispatch(
-            updatePreview({
-                topicPreview,
-                questionPreview,
-            }),
-        );
+        dispatch(updateCurrentIndex(control.currentIndex));
     }, [control.currentIndex]);
 
+    const pendingGoToIndex = useRef<number | undefined>(0);
+    useEffect(() => {
+        control.goToIndex(pendingGoToIndex.current ?? 0);
+    }, [currentTopic.id]);
+
+    useEffect(() => {
+        dispatch(
+            updateNextColumn({
+                nextTopic,
+                nextQuestion,
+            }),
+        );
+    }, [control.currentIndex, currentTopic]);
+
+    const { useEvent } = useKeymap({
+        prevTopic: [{ input: "h" }, { key: "left" }, { key: "delete" }],
+        nextTopic: [{ input: "l" }, { key: "right" }],
+    });
+
+    useEvent("prevTopic", () => {
+        if (parentID) {
+            const nextTrail = idxTrail.slice();
+            pendingGoToIndex.current = nextTrail.pop();
+
+            dispatch(
+                getPrevTopicData({
+                    id: parentID,
+                    idxTrail: nextTrail,
+                }),
+            );
+        }
+    });
+
+    useEvent("nextTopic", () => {
+        const nextTopic = currentTopic.subTopics[control.currentIndex] ?? null;
+        if (nextTopic) {
+            dispatch(
+                getNextTopicData({
+                    id: nextTopic.id,
+                    idxTrail: [...idxTrail, control.currentIndex],
+                }),
+            );
+            pendingGoToIndex.current = 0;
+        }
+    });
+
+    let title = currentPath;
+    if (nextTopic?.name) {
+        if (title.endsWith("/")) {
+            title += nextTopic.name;
+        } else {
+            title += "/" + nextTopic.name;
+        }
+    }
+
     return (
-        <Box>
-            <List listView={listView} scrollbar={{ color: BASE_COLOR }}>
-                {current.topics.map((topic, idx) => {
-                    const isFocus = control.currentIndex === idx;
-                    return (
-                        <TopicListItem key={topic.id} topic={topic} isFocus={isFocus} />
-                    );
-                })}
-                {current.questions.map((question, idx) => {
-                    const isFocus = idx === control.currentIndex - current.topics.length;
-                    return (
-                        <QuestionListItem
-                            key={question.id}
-                            question={question}
-                            isFocus={isFocus}
-                        />
-                    );
-                })}
-            </List>
+        <Box styles={columnBox} titleTopLeft={{ title: title, color: BASE_COLOR }}>
+            {!itemsCount && <Text>Add some topics/questions</Text>}
+            {!!itemsCount && (
+                <List listView={listView} scrollbar={{ color: BASE_COLOR }}>
+                    {currentTopic.subTopics.map((topic, idx) => {
+                        const isFocus = control.currentIndex === idx;
+                        return (
+                            <TopicListItem
+                                key={topic.id}
+                                topic={topic}
+                                isFocus={isFocus}
+                            />
+                        );
+                    })}
+                    {currentTopic.questions.map((question, idx) => {
+                        const isFocus =
+                            idx === control.currentIndex - currentTopic.subTopics.length;
+                        return (
+                            <QuestionListItem
+                                key={question.id}
+                                question={question}
+                                isFocus={isFocus}
+                            />
+                        );
+                    })}
+                </List>
+            )}
         </Box>
     );
 }
 
-function PreviewColumn(): React.ReactNode {
-    const { topic, question } = useAppSelector(selectPreviewColumn);
+function NextColumn(): React.ReactNode {
+    const { nextTopic, nextQuestion } = useAppSelector(selectNextColumn);
 
-    if (!topic && !question) return null;
-
-    const styles: Styles["Box"] = {
-        height: "100",
-        width: "100",
-        flexDirection: "column",
-    };
-
-    if (topic) {
-        return (
-            <Box styles={styles}>
-                {topic.topics.map((topic) => {
-                    return (
-                        <TopicListItem key={topic.id} topic={topic} isFocus={false} dim />
-                    );
-                })}
-                {topic.questions.map((question) => {
-                    return (
-                        <QuestionListItem
-                            key={question.id}
-                            question={question}
-                            isFocus={false}
-                            dim
-                        />
-                    );
-                })}
-            </Box>
-        );
-    }
-
-    if (question) {
-        return (
-            <Box styles={styles}>
-                <Box
-                    width="100"
-                    borderStyle="round"
-                    borderColor="cyan"
-                    titleTopLeft={{ title: "Question", color: "cyan" }}
-                    flexShrink={0}
-                >
-                    <Text color="cyan" dimColor>
-                        {question.question}
-                    </Text>
-                </Box>
-                <HorizontalLine dimColor color="green" />
-                {!question.A && (
+    return (
+        <Box styles={columnBox}>
+            {nextTopic && (
+                <>
+                    {nextTopic.subTopics.map((topic) => {
+                        return (
+                            <TopicListItem
+                                key={topic.id}
+                                topic={topic}
+                                isFocus={false}
+                                dim
+                            />
+                        );
+                    })}
+                    {nextTopic.questions.map((question) => {
+                        return (
+                            <QuestionListItem
+                                key={question.id}
+                                question={question}
+                                isFocus={false}
+                                dim
+                            />
+                        );
+                    })}
+                </>
+            )}
+            {nextQuestion && (
+                <>
                     <Box
                         width="100"
                         borderStyle="round"
-                        borderColor="green"
-                        titleTopLeft={{
-                            title: "Answer",
-                            color: "green",
-                        }}
-                        titleTopRight={{
-                            title: question.type === "qi" ? "[input]" : "",
-                            color: "green",
-                        }}
+                        borderColor="cyan"
+                        titleTopLeft={{ title: "Question", color: "cyan" }}
                         flexShrink={0}
                     >
-                        <Text color="green" dimColor>
-                            {question.answer}
+                        <Text color="cyan" dimColor>
+                            {nextQuestion.question}
                         </Text>
                     </Box>
-                )}
-                {question.A && (
-                    <Text
-                        color={
-                            question.answer.toUpperCase() === "A" ? "green" : undefined
-                        }
-                    >{`A: ${question.A}`}</Text>
-                )}
-                {question.B && (
-                    <Text
-                        color={
-                            question.answer.toUpperCase() === "B" ? "green" : undefined
-                        }
-                    >{`B: ${question.B}`}</Text>
-                )}
-                {question.C && (
-                    <Text
-                        color={
-                            question.answer.toUpperCase() === "C" ? "green" : undefined
-                        }
-                    >{`C: ${question.C}`}</Text>
-                )}
-                {question.D && (
-                    <Text
-                        color={
-                            question.answer.toUpperCase() === "D" ? "green" : undefined
-                        }
-                    >{`D: ${question.D}`}</Text>
-                )}
-            </Box>
-        );
-    }
+                    <HorizontalLine dimColor color="green" />
+                    {!nextQuestion.A && (
+                        <Box
+                            width="100"
+                            borderStyle="round"
+                            borderColor="green"
+                            titleTopLeft={{
+                                title: `Answer${nextQuestion.type === "qi" ? "─[input]" : ""}`,
+                                color: "green",
+                            }}
+                            flexShrink={0}
+                        >
+                            <Text color="green" dimColor>
+                                {nextQuestion.answer}
+                            </Text>
+                        </Box>
+                    )}
+                    {nextQuestion.A && (
+                        <Text
+                            color={
+                                nextQuestion.answer.toUpperCase() === "A"
+                                    ? "green"
+                                    : undefined
+                            }
+                        >{`A: ${nextQuestion.A}`}</Text>
+                    )}
+                    {nextQuestion.B && (
+                        <Text
+                            color={
+                                nextQuestion.answer.toUpperCase() === "B"
+                                    ? "green"
+                                    : undefined
+                            }
+                        >{`B: ${nextQuestion.B}`}</Text>
+                    )}
+                    {nextQuestion.C && (
+                        <Text
+                            color={
+                                nextQuestion.answer.toUpperCase() === "C"
+                                    ? "green"
+                                    : undefined
+                            }
+                        >{`C: ${nextQuestion.C}`}</Text>
+                    )}
+                    {nextQuestion.D && (
+                        <Text
+                            color={
+                                nextQuestion.answer.toUpperCase() === "D"
+                                    ? "green"
+                                    : undefined
+                            }
+                        >{`D: ${nextQuestion.D}`}</Text>
+                    )}
+                </>
+            )}
+        </Box>
+    );
 }
 
 function TopicListItem({
@@ -324,7 +326,7 @@ function TopicListItem({
     isFocus,
     dim = false,
 }: {
-    topic: Topic;
+    topic: TopicModel;
     isFocus: boolean;
     dim?: boolean;
 }): React.ReactNode {
@@ -357,7 +359,7 @@ function QuestionListItem({
     isFocus,
     dim = false,
 }: {
-    question: Question;
+    question: QuestionModel;
     isFocus: boolean;
     dim?: boolean;
 }): React.ReactNode {
@@ -380,6 +382,43 @@ function QuestionListItem({
                 <Text italic dimColor={!isFocus} color={textColor} wrap="truncate-end">
                     {question.question}
                 </Text>
+            </Box>
+        </Box>
+    );
+}
+
+function TopBar(): React.ReactNode {
+    const { currentPath } = useAppSelector(selectTopBar);
+
+    const boxStyles: Styles["Box"] = {
+        height: 3,
+        width: "100",
+        borderStyle: "round",
+        borderColor: BASE_COLOR,
+        justifyContent: "center",
+    };
+
+    const textStyles: Styles["Text"] = {
+        color: BASE_COLOR,
+        dimColor: true,
+    };
+
+    return (
+        <Box height={3} width="100" flexShrink={0}>
+            <Box styles={boxStyles} justifyContent="flex-start">
+                <Text styles={textStyles}>{currentPath}</Text>
+            </Box>
+            <Box width="25" height="100">
+                <Box styles={boxStyles}>
+                    <Text styles={textStyles} wrap="truncate-end">
+                        {"+ Topic"}
+                    </Text>
+                </Box>
+                <Box styles={boxStyles}>
+                    <Text styles={textStyles} wrap="truncate-end">
+                        {"+ Question"}
+                    </Text>
+                </Box>
             </Box>
         </Box>
     );

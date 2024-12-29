@@ -2,13 +2,13 @@ import React from "react";
 import { useList, List, Box } from "phileas";
 import { Colors } from "../../../globals.js";
 import { useAppSelector } from "../../../store/store.js";
-import { selectParentColumn } from "../explorerSlice.js";
 import { EStyles } from "./style.js";
 import TopicListItem from "./TopicListItem.js";
 import QuestionListItem from "./QuestionListItem.js";
+import * as Slice from "../explorerSlice.js";
 
 export default function ParentColumn(): React.ReactNode {
-    const { parentTopic, idxTrail } = useAppSelector(selectParentColumn);
+    const { parentTopic, idxTrail } = useAppSelector(Slice.Selectors.parentColumn);
 
     const subTopicsLength = parentTopic?.subTopics.length ?? 0;
     const questionsLength = parentTopic?.questions.length ?? 0;

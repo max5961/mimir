@@ -1,4 +1,6 @@
-import { KeyMap, logger, useKeymap, useNode } from "phileas";
+import { KeyMap, useKeymap, useNode } from "phileas";
+
+type Node = ReturnType<typeof useNode>;
 
 export const questionViewKeymap = {
     up: [{ input: "k" }, { key: "up" }],
@@ -19,19 +21,21 @@ export const questionViewKeymap = {
     ],
 } satisfies KeyMap;
 
-export const handleGoToNode = (node: ReturnType<typeof useNode>) => (char: string) => {
-    const number = Number(char);
-    if (isNaN(number)) return;
-    node.control.goToNode(number - 1);
-};
+export function goToNode(node: Node) {
+    return (char: string) => {
+        const number = Number(char);
+        !Number.isNaN(number) && node.control.goToNode(number - 1);
+    };
+}
 
 // Because the QuestionType component need special controls
-export default function useNavigation(node: ReturnType<typeof useNode>) {
+export function useNavigation(node: Node) {
     const { useEvent } = useKeymap(questionViewKeymap);
+
     useEvent("up", node.control.up);
     useEvent("down", node.control.down);
     useEvent("left", node.control.left);
     useEvent("right", node.control.right);
     useEvent("nextNode", node.control.next);
-    useEvent("goToNode", handleGoToNode(node));
+    useEvent("goToNode", goToNode(node));
 }

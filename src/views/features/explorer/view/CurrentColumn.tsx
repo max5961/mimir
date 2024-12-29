@@ -4,21 +4,16 @@ import { TopicModel } from "../../../../models/TopicModel.js";
 import { QuestionModel } from "../../../../models/QuestionModel.js";
 import { Colors } from "../../../globals.js";
 import { useAppDispatch, useAppSelector } from "../../../store/store.js";
-import { selectCurrentColumn } from "../explorerSlice.js";
-import {
-    updateCurrentIndex,
-    updateNextColumn,
-    getPrevTopicData,
-    getNextTopicData,
-} from "../explorerSlice.js";
 import { EStyles } from "./style.js";
 import TopicListItem from "./TopicListItem.js";
 import QuestionListItem from "./QuestionListItem.js";
+import * as Slice from "../explorerSlice.js";
 
 export default function CurrentColumn(): React.ReactNode {
     const dispatch = useAppDispatch();
-    const { currentTopic, currentPath, parentID, idxTrail } =
-        useAppSelector(selectCurrentColumn);
+    const { currentTopic, currentPath, parentID, idxTrail } = useAppSelector(
+        Slice.Selectors.currentColumn,
+    );
 
     const topicsCount = currentTopic.subTopics.length ?? 0;
     const questionsCount = currentTopic.questions.length ?? 0;
@@ -32,7 +27,7 @@ export default function CurrentColumn(): React.ReactNode {
         currentTopic.questions[control.currentIndex - topicsCount] ?? null;
 
     useEffect(() => {
-        dispatch(updateCurrentIndex(control.currentIndex));
+        dispatch(Slice.Actions.updateCurrentIndex(control.currentIndex));
     }, [control.currentIndex]);
 
     const pendingGoToIndex = useRef<number | undefined>(0);
@@ -42,7 +37,7 @@ export default function CurrentColumn(): React.ReactNode {
 
     useEffect(() => {
         dispatch(
-            updateNextColumn({
+            Slice.Actions.updateNextColumn({
                 nextTopic,
                 nextQuestion,
             }),
@@ -60,7 +55,7 @@ export default function CurrentColumn(): React.ReactNode {
             pendingGoToIndex.current = nextTrail.pop();
 
             dispatch(
-                getPrevTopicData({
+                Slice.Actions.getPrevTopicData({
                     id: parentID,
                     idxTrail: nextTrail,
                 }),
@@ -72,7 +67,7 @@ export default function CurrentColumn(): React.ReactNode {
         const nextTopic = currentTopic.subTopics[control.currentIndex] ?? null;
         if (nextTopic) {
             dispatch(
-                getNextTopicData({
+                Slice.Actions.getNextTopicData({
                     id: nextTopic.id,
                     idxTrail: [...idxTrail, control.currentIndex],
                 }),

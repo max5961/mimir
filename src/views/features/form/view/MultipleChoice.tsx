@@ -10,34 +10,26 @@ import {
     useTextInput,
 } from "phileas";
 import { useAppDispatch, useAppSelector } from "../../../store/store.js";
-import {
-    pushMcQuestion,
-    selectMcInput,
-    selectQuestion,
-    setInvalidMcInput,
-    updateMcInput,
-} from "../questionFormSlice.js";
-import { QStyles } from "./style.js";
-import { NodeNames } from "./QuestionView.js";
-import useNavigation from "./useNavigation.js";
-import { Colors } from "../../../globals.js";
+import { NodeNames } from "./FormModal.js";
+import { getDecorators } from "./decorators.js";
+import { useNavigation } from "./useNavigation.js";
+import * as Slice from "../formSlice.js";
 
 type Props = {
     register: ReturnType<typeof useNodeMap<NodeNames>>["register"];
 };
 
 export default function MultipleChoice({ register }: Props): React.ReactNode {
-    const { type, A, B, C, D } = useAppSelector(selectQuestion);
+    const { type, A, B, C, D } = useAppSelector(Slice.Selectors.QuestionInput);
 
     const renderAddBtn =
         A === undefined || B === undefined || C === undefined || D === undefined;
 
     return (
         <Box
-            height="100"
-            width="100"
             display={type === "mc" ? "flex" : "none"}
             flexDirection="column"
+            flexShrink={0}
         >
             <Node {...register("a")}>
                 <MCAnswer question={A} />
@@ -63,18 +55,18 @@ export default function MultipleChoice({ register }: Props): React.ReactNode {
 export function AddButton(): React.ReactNode {
     const dispatch = useAppDispatch();
     const node = useNode();
-    const nodeIndex = node.control.getNodeIndex(node.name) + 1;
     useNavigation(node);
-
-    const boxStyles = node.isFocus ? QStyles.FocusedBox : QStyles.UnfocusedBox;
-    const color = boxStyles.borderColor;
 
     const { useEvent } = useKeymap({ pushMcQuestion: { key: "return" } });
     useEvent("pushMcQuestion", () => {
-        dispatch(pushMcQuestion());
+        dispatch(Slice.Actions.pushMcQuestion());
     });
 
-    const titleTopRight = node.isFocus ? "Return to add" : `[${nodeIndex}]`;
+    const { boxStyles, textStyles, color, title } = getDecorators(node, {
+        hasErrors: false,
+        insert: false,
+        type: "button",
+    });
 
     return (
         <Box
@@ -82,19 +74,20 @@ export function AddButton(): React.ReactNode {
             width="100"
             flexShrink={0}
             styles={boxStyles}
-            titleTopRight={{ title: titleTopRight, color: color }}
+            titleTopRight={{ title: title, color: color }}
             justifyContent="center"
         >
-            <Text color={color}>{"Add + "}</Text>
+            <Text styles={textStyles}>{"Add + "}</Text>
         </Box>
     );
 }
 
 export function MCAnswer({ question }: { question?: string }): React.ReactNode {
     const dispatch = useAppDispatch();
-    const { type, A, B, C, D, aErr, bErr, cErr, dErr } = useAppSelector(selectMcInput);
+    const { type, A, B, C, D, aErr, bErr, cErr, dErr } = useAppSelector(
+        Slice.Selectors.McInput,
+    );
     const node = useNode();
-    const nodeIndex = node.control.getNodeIndex(node.name) + 1;
 
     const { onChange, setValue, value, enterInsert, insert } = useTextInput(
         question ?? "",
@@ -121,17 +114,14 @@ export function MCAnswer({ question }: { question?: string }): React.ReactNode {
             isErr = !!exists;
         }
 
-        dispatch(setInvalidMcInput({ mc, isErr }));
+        dispatch(Slice.Actions.setInvalidMcInput({ mc, isErr }));
     }, [type, value]);
 
-    const boxStyles = node.isFocus ? QStyles.FocusedBox : QStyles.UnfocusedBox;
-    const color = boxStyles.borderColor;
-
-    let isErr = false;
-    if (node.name === "a" && aErr) isErr = true;
-    if (node.name === "b" && bErr) isErr = true;
-    if (node.name === "c" && cErr) isErr = true;
-    if (node.name === "d" && dErr) isErr = true;
+    let hasErrors = false;
+    if (node.name === "a" && aErr) hasErrors = true;
+    if (node.name === "b" && bErr) hasErrors = true;
+    if (node.name === "c" && cErr) hasErrors = true;
+    if (node.name === "d" && dErr) hasErrors = true;
 
     const isDisplay = question !== undefined;
     useEffect(() => {
@@ -140,11 +130,11 @@ export function MCAnswer({ question }: { question?: string }): React.ReactNode {
         }
     }, [isDisplay]);
 
-    const titleTopRight = insert
-        ? "Return/Esc to stop"
-        : node.isFocus
-          ? "Return/i to edit"
-          : `[${nodeIndex}]`;
+    const { title, boxStyles, textStyles, color } = getDecorators(node, {
+        hasErrors,
+        insert,
+        type: "line",
+    });
 
     return (
         <Box
@@ -153,16 +143,15 @@ export function MCAnswer({ question }: { question?: string }): React.ReactNode {
             flexShrink={0}
             width="100"
             styles={boxStyles}
-            borderColor={isErr ? Colors.Error : undefined}
-            titleTopRight={{ title: titleTopRight, color: color }}
+            titleTopRight={{ title, color }}
         >
             <Text>{`${node.name.toUpperCase()}: `}</Text>
             <TextInput
-                textStyle={{ color }}
+                textStyle={textStyles}
                 onChange={onChange}
                 onExit={(value: string) => {
                     const mc = node.name as "a" | "b" | "c" | "d";
-                    dispatch(updateMcInput({ mc, value }));
+                    dispatch(Slice.Actions.updateMcInput({ mc, value }));
                 }}
             />
         </Box>

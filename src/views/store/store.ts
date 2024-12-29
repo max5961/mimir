@@ -1,13 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { useDispatch, useSelector, useStore } from "react-redux";
 import explorerSlice from "../features/explorer/explorerSlice.js";
-import questionFormSlice from "../features/question/questionFormSlice.js";
+import formSlice from "../features/form/formSlice.js";
 import { storeLogger } from "../middleware/storeLogger.js";
 
 const store = configureStore({
     reducer: {
         explorer: explorerSlice,
-        questionForm: questionFormSlice,
+        form: formSlice,
     },
     middleware: (getDefaultMiddleware) => {
         return getDefaultMiddleware().concat(

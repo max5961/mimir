@@ -2,10 +2,10 @@ import React from "react";
 import { Styles, Box, Text } from "phileas";
 import { Colors } from "../../../globals.js";
 import { useAppSelector } from "../../../store/store.js";
-import { selectTopBar } from "../explorerSlice.js";
+import * as Slice from "../explorerSlice.js";
 
 export default function TopBar(): React.ReactNode {
-    const { currentPath } = useAppSelector(selectTopBar);
+    const { currentPath } = useAppSelector(Slice.Selectors.topBar);
 
     const boxStyles: Styles["Box"] = {
         height: 3,

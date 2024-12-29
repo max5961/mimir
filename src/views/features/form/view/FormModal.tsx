@@ -1,26 +1,28 @@
 import { Box, KeyMap, Modal, Node, useKeymap, useModal, useNodeMap } from "phileas";
 import React from "react";
 import { useAppDispatch, useAppSelector } from "../../../store/store.js";
-import { createNewQuestion, selectQuestion } from "../questionFormSlice.js";
 import { Colors } from "../../../globals.js";
-import TypeView from "./TypeView.js";
-import { InputAnswer, InputQuestion } from "./Inputs.js";
+import TypeView from "./ChooseFormat.js";
 import MultipleChoice from "./MultipleChoice.js";
 import { SubmitButton, CancelButton } from "./Buttons.js";
+import { AnswerInput, QuestionInput } from "./Inputs.js";
+import * as ExpSlice from "../../explorer/explorerSlice.js";
+import * as Slice from "../formSlice.js";
 
 const QuestionViewKeymap = {
     createNewQuestion: { input: "a" },
 } as const satisfies KeyMap;
 
-export default function QuestionView(): React.ReactNode {
+export default function FormModal(): React.ReactNode {
     const dispatch = useAppDispatch();
+    // const { currentPath } = useAppSelector(selectCurrentPath);
     const { modal, showModal } = useModal({ show: null, hide: null });
 
     const { useEvent } = useKeymap(QuestionViewKeymap);
 
     useEvent("createNewQuestion", () => {
         showModal();
-        dispatch(createNewQuestion());
+        dispatch(Slice.Actions.createNewQuestion());
     });
 
     return (
@@ -31,7 +33,11 @@ export default function QuestionView(): React.ReactNode {
             borderStyle="round"
             borderColor={Colors.Alt}
             paddingX={1}
-            titleTopCenter={{ title: "New Question", color: Colors.Alt }}
+            titleTopCenter={{
+                // title: "New Question in " + currentPath,
+                title: " New Question ",
+                color: Colors.Alt,
+            }}
         >
             <ModalContent />
         </Modal>
@@ -49,7 +55,9 @@ export const nodeMap: NodeNames[][] = [
 ];
 
 function ModalContent(): React.ReactNode {
-    const { type, A, B, C, D } = useAppSelector(selectQuestion);
+    // prettier-ignore
+    const { currentPath } = useAppSelector(ExpSlice.Selectors.currentColumn);
+    const { type, A, B, C, D } = useAppSelector(Slice.Selectors.QuestionInput);
 
     const map = [[...nodeMap[0]], [...nodeMap[1]]];
     if (type === "mc") {
@@ -71,21 +79,21 @@ function ModalContent(): React.ReactNode {
             flexDirection="column"
             gap={1}
             padding={1}
-            justifyContent="space-between"
+            justifyContent="flex-start"
         >
             <Node {...register("type")}>
                 <TypeView />
             </Node>
-            <Box height="100" width="100" flexDirection="row" gap={2}>
+            <Box height="50" width="100" flexDirection="row" gap={2}>
                 <Node {...register("question")}>
-                    <InputQuestion />
+                    <QuestionInput />
                 </Node>
                 <Node {...register("answer")}>
-                    <InputAnswer />
+                    <AnswerInput />
                 </Node>
             </Box>
             <MultipleChoice register={register} />
-            <Box width="100" height="100" alignItems="flex-end">
+            <Box width="100">
                 <Node {...register("submit")}>
                     <SubmitButton />
                 </Node>

@@ -1,22 +1,18 @@
 import React from "react";
 import { Box, Cli, Commands, logger } from "phileas";
 import { useAppDispatch, useAppSelector } from "../store/store.js";
-import {
-    moveTopic,
-    postTopic,
-    selectCommandLine,
-} from "../features/explorer/explorerSlice.js";
 import { TopicModel } from "../../models/TopicModel.js";
+import * as ExpSlice from "../features/explorer/explorerSlice.js";
 
 export default function CommandLine(): React.ReactNode {
     const dispatch = useAppDispatch();
-    const { currentTopic, currentIndex } = useAppSelector(selectCommandLine);
+    const { currentTopic, currentIndex } = useAppSelector(ExpSlice.Selectors.commandLine);
 
     const commands: Commands = {
         ["mkdir"]: async (args) => {
             if (args.length) {
                 dispatch(
-                    postTopic({
+                    ExpSlice.Actions.postTopic({
                         names: args,
                         currentTopicID: currentTopic.id,
                     }),
@@ -39,7 +35,7 @@ export default function CommandLine(): React.ReactNode {
             }
 
             dispatch(
-                moveTopic({
+                ExpSlice.Actions.moveTopic({
                     cwdID: currentTopic.id,
                     targetID: target.id,
                     destination: args[1],

@@ -2,13 +2,13 @@ import React from "react";
 import { Box, Text, HorizontalLine } from "phileas";
 import { Colors } from "../../../globals.js";
 import { useAppSelector } from "../../../store/store.js";
-import { selectNextColumn } from "../explorerSlice.js";
 import { EStyles } from "./style.js";
 import TopicListItem from "./TopicListItem.js";
 import QuestionListItem from "./QuestionListItem.js";
+import * as Slice from "../explorerSlice.js";
 
 export default function NextColumn(): React.ReactNode {
-    const { nextTopic, nextQuestion } = useAppSelector(selectNextColumn);
+    const { nextTopic, nextQuestion } = useAppSelector(Slice.Selectors.nextColumn);
 
     return (
         <Box

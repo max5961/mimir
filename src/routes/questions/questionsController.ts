@@ -1,7 +1,7 @@
 import express from "express";
 import { DataBase } from "../../database/DataBase.js";
 import { QuestionModel } from "../../models/QuestionModel.js";
-import { NewQuestion } from "../../views/features/question/questionFormTypes.js";
+import { NewQuestion } from "../../views/features/form/formSlice.js";
 import createHttpError from "http-errors";
 import { randomUUID } from "crypto";
 import { TopicResponse } from "../topics/topicsController.js";

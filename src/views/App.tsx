@@ -2,9 +2,9 @@ import React, { useEffect } from "react";
 import { Box, Pages, usePages, Viewport, StdinState } from "phileas";
 import { useAppDispatch } from "./store/store.js";
 import { RootTopic } from "../root.js";
-import { getTopicData } from "./features/explorer/explorerSlice.js";
 import Explorer from "./features/explorer/view/Explorer.js";
-import QuestionView from "./features/question/view/QuestionView.js";
+import FormModal from "./features/form/view/FormModal.js";
+import * as ExpSlice from "./features/explorer/explorerSlice.js";
 
 const fullscreen = true;
 
@@ -12,7 +12,7 @@ export default function App(): React.ReactNode {
     const dispatch = useAppDispatch();
 
     useEffect(() => {
-        dispatch(getTopicData({ id: RootTopic.id }));
+        dispatch(ExpSlice.Actions.getTopicData({ id: RootTopic.id }));
     }, []);
 
     const { pageView } = usePages(1);
@@ -22,7 +22,7 @@ export default function App(): React.ReactNode {
             <Pages pageView={pageView}>
                 <Explorer />
             </Pages>
-            <QuestionView />
+            <FormModal />
         </Box>
     );
 

@@ -151,10 +151,12 @@ async function moveTopic(req: Req, res: Res, next: Next): Promise<void> {
     // subTopics array.  Otherwise, the name has just been changed which was done
     // in the for loop.
     if (curr !== destTarget) {
-        currentTopic.subTopics = currentTopic.subTopics.filter(
-            (topic) => topic.id !== subTopicID,
-        );
-        curr.subTopics.push(subTopic);
+        if (!curr.subTopics.find((topic) => topic.name === subTopic.name)) {
+            currentTopic.subTopics = currentTopic.subTopics.filter(
+                (topic) => topic.id !== subTopicID,
+            );
+            curr.subTopics.push(subTopic);
+        }
     }
 
     await DataBase.saveDb(rootTopic);

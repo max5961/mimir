@@ -2,8 +2,9 @@ import React, { useEffect } from "react";
 import { Box, Pages, usePages, Viewport, StdinState } from "phileas";
 import { useAppDispatch } from "./store/store.js";
 import { RootTopic } from "../root.js";
-import { Explorer } from "./features/explorer/Explorer.js";
 import { getTopicData } from "./features/explorer/explorerSlice.js";
+import Explorer from "./features/explorer/view/Explorer.js";
+import QuestionView from "./features/question/view/QuestionView.js";
 
 const fullscreen = true;
 
@@ -21,6 +22,7 @@ export default function App(): React.ReactNode {
             <Pages pageView={pageView}>
                 <Explorer />
             </Pages>
+            <QuestionView />
         </Box>
     );
 

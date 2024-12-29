@@ -8,7 +8,7 @@ import {
 } from "../features/explorer/explorerSlice.js";
 import { TopicModel } from "../../models/TopicModel.js";
 
-export function CommandLine(): React.ReactNode {
+export default function CommandLine(): React.ReactNode {
     const dispatch = useAppDispatch();
     const { currentTopic, currentIndex } = useAppSelector(selectCommandLine);
 
@@ -28,7 +28,7 @@ export function CommandLine(): React.ReactNode {
 
             let target: TopicModel | undefined = currentTopic.subTopics[currentIndex];
             logger.write(currentIndex);
-            if (!args[0]?.match(/^"\$|^'\$|^\$/)) {
+            if (!args[0].match(/^"\$|^'\$|^\$/)) {
                 target = currentTopic.subTopics.find(
                     (subTopic) => subTopic.name === args[0],
                 );

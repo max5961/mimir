@@ -3,13 +3,26 @@ import { topicsRoute } from "../routes/topics/topicsRoute.js";
 import createHttpError from "http-errors";
 import { log } from "./middleware.js";
 import { logger } from "phileas";
+import { questionsRoute } from "../routes/questions/questionsRoute.js";
+
+export const getPath = (baseURL: string) => {
+    return {
+        Api: {
+            Topics: `${baseURL}/api/topics`,
+            Questions: `${baseURL}/api/questions`,
+        },
+    };
+};
+
+const Path = getPath("");
 
 export const app = express();
 
 app.use(express.json());
 app.use(log);
 
-app.use("/api/topics", topicsRoute);
+app.use(Path.Api.Topics, topicsRoute);
+app.use(Path.Api.Questions, questionsRoute);
 
 app.use((_req, _res, next) => {
     next(createHttpError(404, "Not found"));

@@ -18,5 +18,3 @@ export type ExplorerState = {
         showNextColumn: boolean;
     };
 };
-
-export type NewTopic = Omit<TopicModel, "id">;

@@ -1,8 +1,8 @@
-import { BaseURL } from "../../../root.js";
 import { TopicResponse } from "../../../routes/topics/topicsController.js";
+import { Path } from "../../../root.js";
 
 async function getTopicData(topicID: string): Promise<TopicResponse.GetTopicData> {
-    const response = await fetch(`${BaseURL}/api/topics/data/${topicID}`, {
+    const response = await fetch(`${Path.Api.Topics}/data/${topicID}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
     });
@@ -18,7 +18,7 @@ async function postTopics(
     topicID: string,
     newTopicNames: string[],
 ): Promise<TopicResponse.PostTopics> {
-    const response = await fetch(`${BaseURL}/api/topics/${topicID}/subtopics`, {
+    const response = await fetch(`${Path.Api.Topics}/${topicID}/subtopics`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ newTopicNames }),
@@ -36,7 +36,7 @@ async function moveTopic(
     targetID: string,
     destination: string,
 ): Promise<TopicResponse.MoveTopic> {
-    const response = await fetch(`${BaseURL}/api/topics/move/${topicID}/${targetID}`, {
+    const response = await fetch(`${Path.Api.Topics}/move/${topicID}/${targetID}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ destination }),

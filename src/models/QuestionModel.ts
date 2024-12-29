@@ -1,6 +1,7 @@
 type MultipleChoiceAnswer = "A" | "B" | "C" | "D";
 
-type MultipleChoice = {
+export type MultipleChoice = {
+    id: string;
     question: string;
     answer: MultipleChoiceAnswer | Lowercase<MultipleChoiceAnswer>;
     A?: string;
@@ -9,7 +10,8 @@ type MultipleChoice = {
     D?: string;
 };
 
-type QuestionAnswer = {
+export type QuestionAnswer = {
+    id: string;
     question: string;
     answer: string;
 
@@ -21,9 +23,9 @@ type QuestionAnswer = {
     D?: string;
 };
 
-type GenericQuestion<T extends "qa" | "qi" | "mc"> = T extends "mc"
-    ? MultipleChoice & { type: T; id: string }
-    : QuestionAnswer & { type: T; id: string };
+export type GenericQuestion<T extends "qa" | "qi" | "mc"> = T extends "mc"
+    ? MultipleChoice & { type: T }
+    : QuestionAnswer & { type: T };
 
 export type QuestionModel =
     | GenericQuestion<"mc">

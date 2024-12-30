@@ -2,7 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { useDispatch, useSelector, useStore } from "react-redux";
 import explorerSlice from "../features/explorer/explorerSlice.js";
 import formSlice from "../features/form/formSlice.js";
-import { storeLogger } from "../middleware/storeLogger.js";
+import { formLogger, storeLogger } from "../middleware/storeLogger.js";
 
 const store = configureStore({
     reducer: {
@@ -12,7 +12,8 @@ const store = configureStore({
     middleware: (getDefaultMiddleware) => {
         return getDefaultMiddleware().concat(
             // storeLogger({ active: NodeEnv === "development" }),
-            storeLogger({ active: false }),
+            // storeLogger({ active: true }),
+            formLogger({ active: true }),
         );
     },
 });

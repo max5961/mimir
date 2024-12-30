@@ -5,7 +5,7 @@ import { useAppSelector } from "../../../store/store.js";
 import * as Slice from "../explorerSlice.js";
 
 export default function TopBar(): React.ReactNode {
-    const { currentPath } = useAppSelector(Slice.Selectors.topBar);
+    const { currentPath } = useAppSelector(Slice.Selectors.TopBar);
 
     const boxStyles: Styles["Box"] = {
         height: 3,

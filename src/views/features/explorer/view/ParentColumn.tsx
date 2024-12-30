@@ -8,7 +8,7 @@ import QuestionListItem from "./QuestionListItem.js";
 import * as Slice from "../explorerSlice.js";
 
 export default function ParentColumn(): React.ReactNode {
-    const { parentTopic, idxTrail } = useAppSelector(Slice.Selectors.parentColumn);
+    const { parentTopic, idxTrail } = useAppSelector(Slice.Selectors.ParentColumn);
 
     const subTopicsLength = parentTopic?.subTopics.length ?? 0;
     const questionsLength = parentTopic?.questions.length ?? 0;

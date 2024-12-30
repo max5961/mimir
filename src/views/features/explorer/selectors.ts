@@ -1,7 +1,7 @@
 import { createSelector } from "@reduxjs/toolkit";
 import { RootState } from "../../store/store.js";
 
-export const currentColumn = createSelector(
+export const CurrentColumn = createSelector(
     [
         (state: RootState) => state.explorer.topicData.currentTopic,
         (state: RootState) => state.explorer.topicData.currentPath,
@@ -13,7 +13,7 @@ export const currentColumn = createSelector(
     },
 );
 
-export const parentColumn = createSelector(
+export const ParentColumn = createSelector(
     [
         (state: RootState) => state.explorer.topicData.parentTopic,
         (state: RootState) => state.explorer.idxTrail,
@@ -23,7 +23,7 @@ export const parentColumn = createSelector(
     },
 );
 
-export const nextColumn = createSelector(
+export const NextColumn = createSelector(
     [
         (state: RootState) => state.explorer.nextColumn.nextTopic,
         (state: RootState) => state.explorer.nextColumn.nextQuestion,
@@ -38,7 +38,7 @@ export const nextColumn = createSelector(
     },
 );
 
-export const topBar = createSelector(
+export const TopBar = createSelector(
     [(state: RootState) => state.explorer.topicData.currentPath],
     (currentPath) => {
         return {
@@ -47,12 +47,19 @@ export const topBar = createSelector(
     },
 );
 
-export const commandLine = createSelector(
+export const CommandLine = createSelector(
     [
         (state: RootState) => state.explorer.topicData.currentTopic,
         (state: RootState) => state.explorer.currentIndex,
     ],
     (currentTopic, currentIndex) => {
         return { currentTopic, currentIndex };
+    },
+);
+
+export const currentPath = createSelector(
+    [(state: RootState) => state.explorer.topicData.currentPath],
+    (currentPath) => {
+        return { currentPath };
     },
 );

@@ -1,13 +1,16 @@
 type MultipleChoiceAnswer = "A" | "B" | "C" | "D";
 
+export type MultipleChoiceOpt = { id: string; value: string };
+
 export type MultipleChoice = {
     id: string;
     question: string;
-    answer: MultipleChoiceAnswer | Lowercase<MultipleChoiceAnswer>;
-    A?: string;
-    B?: string;
-    C?: string;
-    D?: string;
+    answer?: string;
+    multipleChoiceAnswer?: MultipleChoiceAnswer;
+    a?: MultipleChoiceOpt;
+    b?: MultipleChoiceOpt;
+    c?: MultipleChoiceOpt;
+    d?: MultipleChoiceOpt;
 };
 
 export type QuestionAnswer = {
@@ -17,10 +20,11 @@ export type QuestionAnswer = {
 
     // These will never be assigned, but exist only so that this type can be combined
     // with MultipleChoice
-    A?: string;
-    B?: string;
-    C?: string;
-    D?: string;
+    multipleChoiceAnswer?: MultipleChoiceAnswer;
+    a?: MultipleChoiceOpt;
+    b?: MultipleChoiceOpt;
+    c?: MultipleChoiceOpt;
+    d?: MultipleChoiceOpt;
 };
 
 export type GenericQuestion<T extends "qa" | "qi" | "mc"> = T extends "mc"

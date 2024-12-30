@@ -10,7 +10,7 @@ import {
     useTextInput,
 } from "phileas";
 import { useAppDispatch, useAppSelector } from "../../../store/store.js";
-import { NodeNames } from "./FormModal.js";
+import { NodeNames } from "./Form.js";
 import { getDecorators } from "./decorators.js";
 import { useNavigation } from "./useNavigation.js";
 import * as Slice from "../formSlice.js";
@@ -20,53 +20,132 @@ type Props = {
 };
 
 export default function MultipleChoice({ register }: Props): React.ReactNode {
-    const { type, A, B, C, D } = useAppSelector(Slice.Selectors.QuestionInput);
-
-    const renderAddBtn =
-        A === undefined || B === undefined || C === undefined || D === undefined;
+    const { questionType, opts } = useAppSelector(Slice.Selectors.MultipleChoice);
 
     return (
         <Box
-            display={type === "mc" ? "flex" : "none"}
+            display={questionType === "mc" ? "flex" : "none"}
             flexDirection="column"
             flexShrink={0}
         >
-            <Node {...register("a")}>
-                <MCAnswer question={A} />
-            </Node>
-            <Node {...register("b")}>
-                <MCAnswer question={B} />
-            </Node>
-            <Node {...register("c")}>
-                <MCAnswer question={C} />
-            </Node>
-            <Node {...register("d")}>
-                <MCAnswer question={D} />
-            </Node>
-            {renderAddBtn && (
-                <Node {...register("add-mc")}>
-                    <AddButton />
+            {opts.a !== undefined && (
+                <Node {...register("a")}>
+                    <Opt opt={opts.a.value} id={opts.a.id} />
                 </Node>
             )}
+            {opts.b !== undefined && (
+                <Node {...register("b")}>
+                    <Opt opt={opts.b.value} id={opts.b.id} />
+                </Node>
+            )}
+            {opts.c !== undefined && (
+                <Node {...register("c")}>
+                    <Opt opt={opts.c.value} id={opts.c.id} />
+                </Node>
+            )}
+            {opts.d !== undefined && (
+                <Node {...register("d")}>
+                    <Opt opt={opts.d.value} id={opts.d.id} />
+                </Node>
+            )}
+            <Node {...register("add-mc")}>
+                <AddButton />
+            </Node>
+        </Box>
+    );
+}
+
+export function Opt({ id, opt }: { id: string; opt: string }): React.ReactNode {
+    const dispatch = useAppDispatch();
+    const { opts, invalidOpts } = useAppSelector(Slice.Selectors.Opt);
+    const node = useNode();
+    useNavigation(node);
+
+    // Handle deletion.
+    const { useEvent } = useKeymap({ deleteOpt: { input: "dd" } });
+    useEvent("deleteOpt", () => {
+        dispatch(Slice.Actions.deleteMultipleChoiceOpt(node.name as Slice.OptName));
+    });
+
+    // Handle text input
+    const { onChange, setValue, value, enterInsert, insert } = useTextInput(opt ?? "");
+
+    // Since opts cascade towards the beginning of the alphabet, when the id changes
+    // we know we need to change the value
+    useEffect(() => {
+        setValue(opt);
+    }, [id]);
+
+    // Go straight into insert mode, but only if we just created this opt.
+    const shouldDisplay = opts[node.name] !== undefined;
+    useEffect(() => {
+        if (shouldDisplay) {
+            enterInsert();
+        }
+    }, [shouldDisplay]);
+
+    // Whenever the value changes, or the opts change, update errors.  Errors
+    // occur when the opt doesn't have a unique value among the others.
+    useEffect(() => {
+        if (opt !== undefined) {
+            const optName = node.name as Slice.OptName;
+
+            const otherValues = new Set<string>();
+
+            Object.values(opts).forEach((opt) => {
+                opt && opt.id !== id && otherValues.add(opt.value);
+            });
+
+            const hasError = otherValues.has(value) || value === "";
+
+            // Update the value too so that opts are updated and other opts check for errors as well
+            dispatch(Slice.Actions.updateMultipleChoiceValue({ optName, value }));
+            dispatch(Slice.Actions.updateMultipleChoiceErrors({ optName, hasError }));
+        }
+    }, [value, opts]);
+
+    // Apply styles
+    const { title, boxStyles, textStyles, color } = getDecorators(node, {
+        hasErrors: invalidOpts[node.name],
+        insert,
+        type: "line",
+    });
+
+    return (
+        <Box
+            height={3}
+            flexShrink={0}
+            width="100"
+            styles={boxStyles}
+            titleTopRight={{ title, color }}
+        >
+            <Text styles={textStyles}>{` ${node.name.toUpperCase()} | `}</Text>
+            <TextInput onChange={onChange} textStyle={textStyles} />
         </Box>
     );
 }
 
 export function AddButton(): React.ReactNode {
     const dispatch = useAppDispatch();
+    const opts = useAppSelector(Slice.Selectors.opts);
+
     const node = useNode();
     useNavigation(node);
 
     const { useEvent } = useKeymap({ pushMcQuestion: { key: "return" } });
     useEvent("pushMcQuestion", () => {
-        dispatch(Slice.Actions.pushMcQuestion());
+        dispatch(Slice.Actions.addMultipleChoiceInput());
     });
+
+    const shouldRender = Object.values(opts).some((opt) => opt === undefined);
 
     const { boxStyles, textStyles, color, title } = getDecorators(node, {
         hasErrors: false,
         insert: false,
         type: "button",
     });
+
+    if (!shouldRender) return null;
 
     return (
         <Box
@@ -78,82 +157,6 @@ export function AddButton(): React.ReactNode {
             justifyContent="center"
         >
             <Text styles={textStyles}>{"Add + "}</Text>
-        </Box>
-    );
-}
-
-export function MCAnswer({ question }: { question?: string }): React.ReactNode {
-    const dispatch = useAppDispatch();
-    const { type, A, B, C, D, aErr, bErr, cErr, dErr } = useAppSelector(
-        Slice.Selectors.McInput,
-    );
-    const node = useNode();
-
-    const { onChange, setValue, value, enterInsert, insert } = useTextInput(
-        question ?? "",
-    );
-    useNavigation(node);
-
-    useEffect(() => {
-        setValue(question ?? "");
-    }, [question]);
-
-    useEffect(() => {
-        const mc = node.name as "a" | "b" | "c" | "d";
-
-        let isErr = false;
-        if (value === "") {
-            isErr = true;
-        } else {
-            const exists = [A, B, C, D]
-                .filter(
-                    (_, idx) => node.name.toUpperCase() !== String.fromCharCode(idx + 65),
-                )
-                .filter((opt) => opt !== undefined)
-                .find((opt) => opt === value);
-            isErr = !!exists;
-        }
-
-        dispatch(Slice.Actions.setInvalidMcInput({ mc, isErr }));
-    }, [type, value]);
-
-    let hasErrors = false;
-    if (node.name === "a" && aErr) hasErrors = true;
-    if (node.name === "b" && bErr) hasErrors = true;
-    if (node.name === "c" && cErr) hasErrors = true;
-    if (node.name === "d" && dErr) hasErrors = true;
-
-    const isDisplay = question !== undefined;
-    useEffect(() => {
-        if (isDisplay) {
-            enterInsert();
-        }
-    }, [isDisplay]);
-
-    const { title, boxStyles, textStyles, color } = getDecorators(node, {
-        hasErrors,
-        insert,
-        type: "line",
-    });
-
-    return (
-        <Box
-            display={question === undefined ? "none" : "flex"}
-            height={3}
-            flexShrink={0}
-            width="100"
-            styles={boxStyles}
-            titleTopRight={{ title, color }}
-        >
-            <Text>{`${node.name.toUpperCase()}: `}</Text>
-            <TextInput
-                textStyle={textStyles}
-                onChange={onChange}
-                onExit={(value: string) => {
-                    const mc = node.name as "a" | "b" | "c" | "d";
-                    dispatch(Slice.Actions.updateMcInput({ mc, value }));
-                }}
-            />
         </Box>
     );
 }

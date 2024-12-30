@@ -1,35 +1,15 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Box, TextInput, useTextInput, useNode } from "phileas";
-import { Colors } from "../../../globals.js";
-import { useAppDispatch, useAppSelector } from "../../../store/store.js";
 import { getDecorators } from "./decorators.js";
 import { useNavigation } from "./useNavigation.js";
-import * as Slice from "../formSlice.js";
 
 export function AnswerInput(): React.ReactNode {
-    const dispatch = useAppDispatch();
-    const { type, A, B, C, D, invalidMcAnswer } = useAppSelector(
-        Slice.Selectors.AnswerInput,
-    );
-    const { onChange, value, insert } = useTextInput();
+    const { onChange, insert } = useTextInput();
     const node = useNode();
     useNavigation(node);
 
-    useEffect(() => {
-        const opts = [A, B, C, D]
-            .filter((opt) => opt !== undefined)
-            .map((_, idx) => {
-                return String.fromCharCode(65 + idx);
-            });
-        const isErr = !opts.find((opt) => opt === value.toUpperCase());
-
-        dispatch(
-            Slice.Actions.setInvalidMcAnswer((isErr || !opts.length) && type === "mc"),
-        );
-    }, [type, value, insert, A, B, C, D]);
-
     const { title, color, boxStyles, textStyles } = getDecorators(node, {
-        hasErrors: invalidMcAnswer,
+        hasErrors: false,
         insert,
         type: "area",
     });
@@ -41,7 +21,6 @@ export function AnswerInput(): React.ReactNode {
             titleTopLeft={{ title: "Answer", color }}
             titleTopRight={{ title, color }}
             styles={boxStyles}
-            borderColor={invalidMcAnswer ? Colors.Error : undefined}
         >
             <TextInput
                 onChange={onChange}

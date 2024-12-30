@@ -8,7 +8,7 @@ export function getDecorators(
     opts: { hasErrors: boolean; insert: boolean; type: "line" | "area" | "button" },
 ) {
     /**** color *****/
-    let color = node.isFocus ? Colors.Alt : Colors.Primary;
+    let color = node.isFocus ? Colors.Primary : Colors.Alt;
     if (opts.hasErrors) {
         color = Colors.Error;
     }

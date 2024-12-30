@@ -1,9 +1,9 @@
 import React, { useEffect } from "react";
-import { Box, Pages, usePages, Viewport, StdinState } from "phileas";
+import { Box, Pages, usePages, Viewport } from "phileas";
 import { useAppDispatch } from "./store/store.js";
 import { RootTopic } from "../root.js";
 import Explorer from "./features/explorer/view/Explorer.js";
-import FormModal from "./features/form/view/FormModal.js";
+import Form from "./features/form/view/Form.js";
 import * as ExpSlice from "./features/explorer/explorerSlice.js";
 
 const fullscreen = true;
@@ -22,14 +22,14 @@ export default function App(): React.ReactNode {
             <Pages pageView={pageView}>
                 <Explorer />
             </Pages>
-            <FormModal />
+            <Form />
         </Box>
     );
 
     return fullscreen ? (
         <Viewport flexDirection="column">{content}</Viewport>
     ) : (
-        <Box height={20} width="100">
+        <Box height={40} width="100">
             {content}
         </Box>
     );

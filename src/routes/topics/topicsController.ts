@@ -4,9 +4,7 @@ import { randomUUID } from "crypto";
 import { DataBase } from "../../database/DataBase.js";
 import TopicService from "../../services/TopicService.js";
 import { TopicModel } from "../../models/TopicModel.js";
-import { logger } from "phileas";
 import { RootTopic } from "../../root.js";
-import assert from "assert";
 
 type Req = express.Request;
 type Res = express.Response;

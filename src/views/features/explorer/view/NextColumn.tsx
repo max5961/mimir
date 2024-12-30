@@ -8,7 +8,7 @@ import QuestionListItem from "./QuestionListItem.js";
 import * as Slice from "../explorerSlice.js";
 
 export default function NextColumn(): React.ReactNode {
-    const { nextTopic, nextQuestion } = useAppSelector(Slice.Selectors.nextColumn);
+    const { nextTopic, nextQuestion } = useAppSelector(Slice.Selectors.NextColumn);
 
     return (
         <Box
@@ -53,7 +53,7 @@ export default function NextColumn(): React.ReactNode {
                         </Text>
                     </Box>
                     <HorizontalLine dimColor color={Colors.Primary} />
-                    {!nextQuestion.A && (
+                    {!nextQuestion.a && (
                         <Box
                             width="100"
                             borderStyle="round"
@@ -69,41 +69,41 @@ export default function NextColumn(): React.ReactNode {
                             </Text>
                         </Box>
                     )}
-                    {nextQuestion.A && (
+                    {nextQuestion.a && (
                         <Text
                             color={
-                                nextQuestion.answer.toUpperCase() === "A"
+                                nextQuestion.multipleChoiceAnswer === "A"
                                     ? Colors.Primary
                                     : undefined
                             }
-                        >{`A: ${nextQuestion.A}`}</Text>
+                        >{`A: ${nextQuestion.a.value}`}</Text>
                     )}
-                    {nextQuestion.B && (
+                    {nextQuestion.b && (
                         <Text
                             color={
-                                nextQuestion.answer.toUpperCase() === "B"
+                                nextQuestion.multipleChoiceAnswer === "B"
                                     ? Colors.Primary
                                     : undefined
                             }
-                        >{`B: ${nextQuestion.B}`}</Text>
+                        >{`B: ${nextQuestion.b.value}`}</Text>
                     )}
-                    {nextQuestion.C && (
+                    {nextQuestion.c && (
                         <Text
                             color={
-                                nextQuestion.answer.toUpperCase() === "C"
+                                nextQuestion.multipleChoiceAnswer === "C"
                                     ? Colors.Primary
                                     : undefined
                             }
-                        >{`C: ${nextQuestion.C}`}</Text>
+                        >{`C: ${nextQuestion.c.value}`}</Text>
                     )}
-                    {nextQuestion.D && (
+                    {nextQuestion.d && (
                         <Text
                             color={
-                                nextQuestion.answer.toUpperCase() === "D"
+                                nextQuestion.multipleChoiceAnswer === "D"
                                     ? Colors.Primary
                                     : undefined
                             }
-                        >{`D: ${nextQuestion.D}`}</Text>
+                        >{`D: ${nextQuestion.d.value}`}</Text>
                     )}
                 </>
             )}

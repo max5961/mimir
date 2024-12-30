@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Box, Text, List, useNode, useList, useKeymap } from "phileas";
 import { useAppDispatch, useAppSelector } from "../../../store/store.js";
 import { goToNode, questionViewKeymap } from "./useNavigation.js";
@@ -6,16 +6,16 @@ import { QuestionModel } from "../../../../models/QuestionModel.js";
 import { getDecorators } from "./decorators.js";
 import * as Slice from "../formSlice.js";
 
-const QuestionFormat = {
+const QuestionType = {
     QA: "Question/Answer",
     QI: "Question/Input",
     MC: "Multiple Choice",
 };
-const questionTypes = [QuestionFormat.QA, QuestionFormat.QI, QuestionFormat.MC];
+const questionTypes = [QuestionType.QA, QuestionType.QI, QuestionType.MC];
 
 export default function ChooseFormat(): React.ReactNode {
     const dispatch = useAppDispatch();
-    const { type } = useAppSelector(Slice.Selectors.QuestionInput);
+    const questionType = useAppSelector(Slice.Selectors.questionType);
     const list = useList(questionTypes, { navigation: "none" });
     const node = useNode();
 
@@ -42,10 +42,6 @@ export default function ChooseFormat(): React.ReactNode {
     useEvent("goToNode", goToNode(node));
     useEvent("setType", setType);
 
-    useEffect(() => {
-        type !== "mc" && dispatch(Slice.Actions.setInvalidMcAnswer(false));
-    }, [type]);
-
     const { color, boxStyles, title } = getDecorators(node, {
         hasErrors: false,
         insert: false,
@@ -71,9 +67,12 @@ export default function ChooseFormat(): React.ReactNode {
                     const isShallowFocus = list.control.currentIndex === idx;
 
                     let isChosen = false;
-                    if (item === QuestionFormat.QA && type === "qa") isChosen = true;
-                    if (item === QuestionFormat.QI && type === "qi") isChosen = true;
-                    if (item === QuestionFormat.MC && type === "mc") isChosen = true;
+                    if (item === QuestionType.QA && questionType === "qa")
+                        isChosen = true;
+                    if (item === QuestionType.QI && questionType === "qi")
+                        isChosen = true;
+                    if (item === QuestionType.MC && questionType === "mc")
+                        isChosen = true;
 
                     const prefix = isChosen ? "[ X ]" : "[   ]";
 

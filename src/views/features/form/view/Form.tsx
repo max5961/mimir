@@ -8,14 +8,15 @@ import { SubmitButton, CancelButton } from "./Buttons.js";
 import { AnswerInput, QuestionInput } from "./Inputs.js";
 import * as ExpSlice from "../../explorer/explorerSlice.js";
 import * as Slice from "../formSlice.js";
+import { MultipleChoiceDropDown } from "./MultipleChoiceDropDown.js";
 
 const QuestionViewKeymap = {
     createNewQuestion: { input: "a" },
 } as const satisfies KeyMap;
 
-export default function FormModal(): React.ReactNode {
+export default function Form(): React.ReactNode {
     const dispatch = useAppDispatch();
-    // const { currentPath } = useAppSelector(selectCurrentPath);
+    let { currentPath } = useAppSelector(ExpSlice.Selectors.currentPath);
     const { modal, showModal } = useModal({ show: null, hide: null });
 
     const { useEvent } = useKeymap(QuestionViewKeymap);
@@ -34,8 +35,7 @@ export default function FormModal(): React.ReactNode {
             borderColor={Colors.Alt}
             paddingX={1}
             titleTopCenter={{
-                // title: "New Question in " + currentPath,
-                title: " New Question ",
+                title: `New Question───${currentPath}`,
                 color: Colors.Alt,
             }}
         >
@@ -56,16 +56,15 @@ export const nodeMap: NodeNames[][] = [
 
 function ModalContent(): React.ReactNode {
     // prettier-ignore
-    const { currentPath } = useAppSelector(ExpSlice.Selectors.currentColumn);
-    const { type, A, B, C, D } = useAppSelector(Slice.Selectors.QuestionInput);
+    const { type, opts } = useAppSelector(Slice.Selectors.Form);
 
     const map = [[...nodeMap[0]], [...nodeMap[1]]];
     if (type === "mc") {
         let length = 0;
-        A !== undefined && map.push(["a"]) && ++length;
-        B !== undefined && map.push(["b"]) && ++length;
-        C !== undefined && map.push(["c"]) && ++length;
-        D !== undefined && map.push(["d"]) && ++length;
+        opts.a !== undefined && map.push(["a"]) && ++length;
+        opts.b !== undefined && map.push(["b"]) && ++length;
+        opts.c !== undefined && map.push(["c"]) && ++length;
+        opts.d !== undefined && map.push(["d"]) && ++length;
         length < 4 && map.push(["add-mc"]);
     }
     map.push(["submit", "cancel"]);
@@ -89,7 +88,7 @@ function ModalContent(): React.ReactNode {
                     <QuestionInput />
                 </Node>
                 <Node {...register("answer")}>
-                    <AnswerInput />
+                    {type === "mc" ? <MultipleChoiceDropDown /> : <AnswerInput />}
                 </Node>
             </Box>
             <MultipleChoice register={register} />

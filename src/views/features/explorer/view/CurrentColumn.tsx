@@ -12,7 +12,7 @@ import * as Slice from "../explorerSlice.js";
 export default function CurrentColumn(): React.ReactNode {
     const dispatch = useAppDispatch();
     const { currentTopic, currentPath, parentID, idxTrail } = useAppSelector(
-        Slice.Selectors.currentColumn,
+        Slice.Selectors.CurrentColumn,
     );
 
     const topicsCount = currentTopic.subTopics.length ?? 0;

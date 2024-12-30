@@ -6,7 +6,7 @@ import * as ExpSlice from "../features/explorer/explorerSlice.js";
 
 export default function CommandLine(): React.ReactNode {
     const dispatch = useAppDispatch();
-    const { currentTopic, currentIndex } = useAppSelector(ExpSlice.Selectors.commandLine);
+    const { currentTopic, currentIndex } = useAppSelector(ExpSlice.Selectors.CommandLine);
 
     const commands: Commands = {
         ["mkdir"]: async (args) => {

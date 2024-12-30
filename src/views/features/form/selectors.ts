@@ -1,58 +1,87 @@
 import { createSelector } from "@reduxjs/toolkit";
 import { RootState } from "../../store/store.js";
+import { logger } from "phileas";
 
-export const QuestionInput = createSelector(
+export const opts = createSelector(
     [
-        (state: RootState) => state.form.question.id,
-        (state: RootState) => state.form.question.type,
-        (state: RootState) => state.form.question.question,
-        (state: RootState) => state.form.question.answer,
-        (state: RootState) => state.form.question.A,
-        (state: RootState) => state.form.question.B,
-        (state: RootState) => state.form.question.C,
-        (state: RootState) => state.form.question.D,
+        (state: RootState) => state.form.question.a,
+        (state: RootState) => state.form.question.b,
+        (state: RootState) => state.form.question.c,
+        (state: RootState) => state.form.question.d,
     ],
-    (id, type, question, answer, A, B, C, D) => {
+    (a, b, c, d) => {
+        return { a, b, c, d };
+    },
+);
+
+export const invalidOpts = createSelector(
+    [
+        (state: RootState) => state.form.errors.opts.a,
+        (state: RootState) => state.form.errors.opts.b,
+        (state: RootState) => state.form.errors.opts.c,
+        (state: RootState) => state.form.errors.opts.d,
+    ],
+    (a, b, c, d) => {
+        return { a, b, c, d };
+    },
+);
+
+export const questionType = (state: RootState) => state.form.question.type;
+export const questionID = (state: RootState) => state.form.question.id;
+export const question = (state: RootState) => state.form.question.question;
+export const answer = (state: RootState) => state.form.question.answer;
+export const multipleChoiceDropDownError = (state: RootState) =>
+    state.form.errors.multipleChoiceDropDown;
+export const multipleChoiceAnswer = (state: RootState) =>
+    state.form.question.multipleChoiceAnswer;
+
+export const takenQuestionNames = createSelector(
+    [(state: RootState) => state.explorer.topicData.currentTopic.questions],
+    (questions) => {
+        const set = new Set<string>();
+        questions.forEach((question) => set.add(question.question));
+        return set;
+    },
+);
+
+export const Form = createSelector([questionType, opts], (type, opts) => {
+    return {
+        type,
+        opts,
+    };
+});
+
+export const AnswerInput = createSelector([Form], (form) => {
+    return {
+        type: form.type,
+        opts: form.opts,
+    };
+});
+
+export const MultipleChoice = createSelector(
+    [questionType, opts],
+    (questionType, opts) => {
         return {
-            id,
-            type,
-            question,
-            answer,
-            A,
-            B,
-            C,
-            D,
+            questionType,
+            opts,
         };
     },
 );
 
-export const AnswerInput = createSelector(
-    [
-        (state: RootState) => state.form.question.type,
-        (state: RootState) => state.form.question.A,
-        (state: RootState) => state.form.question.B,
-        (state: RootState) => state.form.question.C,
-        (state: RootState) => state.form.question.D,
-        (state: RootState) => state.form.errors.invalidMcAnswer,
-    ],
-    (type, A, B, C, D, invalidMcAnswer) => {
-        return { type, A, B, C, D, invalidMcAnswer };
-    },
-);
+export const Opt = createSelector([opts, invalidOpts], (opts, invalidOpts) => {
+    return { opts, invalidOpts };
+});
 
-export const McInput = createSelector(
-    [
-        (state: RootState) => state.form.question.type,
-        (state: RootState) => state.form.question.A,
-        (state: RootState) => state.form.question.B,
-        (state: RootState) => state.form.question.C,
-        (state: RootState) => state.form.question.D,
-        (state: RootState) => state.form.errors.invalidMcInput.a,
-        (state: RootState) => state.form.errors.invalidMcInput.b,
-        (state: RootState) => state.form.errors.invalidMcInput.c,
-        (state: RootState) => state.form.errors.invalidMcInput.d,
-    ],
-    (type, A, B, C, D, aErr, bErr, cErr, dErr) => {
-        return { type, A, B, C, D, aErr, bErr, cErr, dErr };
+export const DropDown = createSelector(
+    [opts, multipleChoiceAnswer],
+    (opts, multipleChoiceAnswer) => {
+        const visibleOpts = Object.values(opts)
+            .filter((opt) => opt !== undefined)
+            .map((_, idx) => String.fromCharCode(65 + idx));
+
+        return {
+            opts: visibleOpts,
+            multipleChoiceAnswer,
+        };
     },
 );

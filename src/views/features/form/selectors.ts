@@ -34,6 +34,10 @@ export const multipleChoiceDropDownError = (state: RootState) =>
     state.form.errors.multipleChoiceDropDown;
 export const multipleChoiceAnswer = (state: RootState) =>
     state.form.question.multipleChoiceAnswer;
+export const questionInputReturnAction = (state: RootState) =>
+    state.form.questionInputReturnAction;
+export const answerInputReturnAction = (state: RootState) =>
+    state.form.answerInputReturnAction;
 
 export const takenQuestionNames = createSelector(
     [(state: RootState) => state.explorer.topicData.currentTopic.questions],

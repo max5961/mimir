@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import {
     Box,
     Text,
@@ -76,16 +76,15 @@ function DropDown(): React.ReactNode {
 
     const selectOpts = [Prompt, ...opts];
 
-    const { listView, control } = useList(selectOpts.length, { unitSize: 1 });
-
-    useEffect(() => {
+    const startIndex = useMemo(() => {
         let idx = 0;
         for (let i = 0; i < selectOpts.length; ++i) {
             if (selectOpts[i] === multipleChoiceAnswer) idx = i;
         }
-
-        control.goToIndex(idx);
+        return idx;
     }, []);
+
+    const { listView } = useList(selectOpts.length, { unitSize: 1, startIndex });
 
     return (
         <List listView={listView} scrollbar={{ hide: true }}>

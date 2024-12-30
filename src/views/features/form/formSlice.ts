@@ -5,12 +5,15 @@ import { randomUUID } from "crypto";
 
 export type NewQuestion = Omit<QuestionModel, "id">;
 export type MCAnswer = QuestionModel["multipleChoiceAnswer"];
+export type InputReturnAction = "exit" | "new-line";
 
 export type OptName = "a" | "b" | "c" | "d";
 
 type State = {
     question: NewQuestion & { id?: string };
     isValid: boolean;
+    questionInputReturnAction: InputReturnAction;
+    answerInputReturnAction: InputReturnAction;
     errors: {
         existQuestionName: boolean;
         multipleChoiceDropDown: boolean;
@@ -25,6 +28,8 @@ type State = {
 
 const initialState: State = {
     question: { id: "", type: "qa", question: "", answer: "" },
+    questionInputReturnAction: "exit",
+    answerInputReturnAction: "exit",
     isValid: false,
     errors: {
         existQuestionName: false,
@@ -124,6 +129,18 @@ const questionSlice = createSlice({
         ) {
             state.question.multipleChoiceAnswer = action.payload;
             state.errors.multipleChoiceDropDown = !!!action.payload;
+        },
+        setQuestionInputReturnAction(
+            state: State,
+            action: PayloadAction<InputReturnAction>,
+        ) {
+            state.questionInputReturnAction = action.payload;
+        },
+        setAnswerInputReturnAction(
+            state: State,
+            action: PayloadAction<InputReturnAction>,
+        ) {
+            state.answerInputReturnAction = action.payload;
         },
     },
     extraReducers(builder) {

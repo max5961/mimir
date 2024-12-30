@@ -1,11 +1,17 @@
 import { Styles, useNode } from "phileas";
 import { Colors } from "../../../globals.js";
+import { InputReturnAction } from "../formSlice.js";
 
 type Node = ReturnType<typeof useNode>;
 
 export function getDecorators(
     node: Node,
-    opts: { hasErrors: boolean; insert: boolean; type: "line" | "area" | "button" },
+    opts: {
+        hasErrors: boolean;
+        insert: boolean;
+        type: "line" | "area" | "button";
+        returnAction?: InputReturnAction;
+    },
 ) {
     /**** color *****/
     let color = node.isFocus ? Colors.Primary : Colors.Alt;
@@ -29,9 +35,15 @@ export function getDecorators(
     let title = marker;
     if (opts.type !== "button" && node.isFocus) {
         if (opts.type === "line") {
-            title = opts.insert ? "Return/Esc to stop" : "Return/i to edit";
+            title = opts.insert
+                ? "[Return/Esc to stop]"
+                : "[Return/i to edit, dd to delete]";
         } else {
-            title = opts.insert ? "Esc to stop" : "Return/i to edit";
+            if (opts.returnAction === "exit") {
+                title = opts.insert ? "[Esc/Return to stop]" : "[Return/i to edit]";
+            } else {
+                title = opts.insert ? "[Esc to stop]" : "[Return/i to edit]";
+            }
         }
     }
 

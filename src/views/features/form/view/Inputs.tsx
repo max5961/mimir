@@ -28,6 +28,7 @@ export function QuestionInput(): React.ReactNode {
         hasErrors: false,
         insert,
         type: "area",
+        returnAction,
     });
 
     return (
@@ -72,6 +73,7 @@ export function AnswerInput(): React.ReactNode {
         hasErrors: false,
         insert,
         type: "area",
+        returnAction,
     });
 
     return (
@@ -102,8 +104,8 @@ function getReturnActionDecorators(
     if (focus && !insert) {
         titleBottomRight =
             returnAction === "exit" && !insert
-                ? "[Return action: exit] (ctrl+t toggle)"
-                : "[Return action: new line] (ctrl+t toggle)";
+                ? "[Return action: stop] (toggle ctrl+t)"
+                : "[Return action: \\n] (toggle ctrl+t)";
     }
 
     const exitKeymap: KeyInput = [{ key: "esc" }];

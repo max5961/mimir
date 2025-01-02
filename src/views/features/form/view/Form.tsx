@@ -1,5 +1,15 @@
-import { Box, KeyMap, Modal, Node, useKeymap, useModal, useNodeMap } from "phileas";
-import React from "react";
+import {
+    Box,
+    KeyMap,
+    Modal,
+    Node,
+    Styles,
+    useKeymap,
+    useModal,
+    useNodeMap,
+    useStdout,
+} from "phileas";
+import React, { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../../store/store.js";
 import { Colors } from "../../../globals.js";
 import TypeView from "./ChooseFormat.js";
@@ -16,6 +26,7 @@ const QuestionViewKeymap = {
 
 export default function Form(): React.ReactNode {
     const dispatch = useAppDispatch();
+    const { stdout } = useStdout();
     let { currentPath } = useAppSelector(ExpSlice.Selectors.currentPath);
     const { modal, showModal } = useModal({ show: null, hide: null });
 
@@ -26,11 +37,33 @@ export default function Form(): React.ReactNode {
         dispatch(Slice.Actions.createNewQuestion());
     });
 
+    const [hw, setHw] = useState({ h: stdout.rows, w: stdout.columns });
+
+    const styles: Styles["Box"] = {
+        height: "75",
+        width: 125,
+    };
+
+    if (hw.h < 40) {
+        styles.height = "100";
+    }
+
+    if (hw.w <= 125) {
+        styles.width = "100";
+    }
+
+    useEffect(() => {
+        const handler = () => setHw({ h: stdout.rows, w: stdout.columns });
+        stdout.on("resize", handler);
+        return () => {
+            stdout.off("resize", handler);
+        };
+    }, [stdout]);
+
     return (
         <Modal
             modal={modal}
-            height="75"
-            width={125}
+            styles={styles}
             borderStyle="round"
             borderColor={Colors.Alt}
             paddingX={1}

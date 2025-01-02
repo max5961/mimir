@@ -1,6 +1,6 @@
 import "./env/Env.js";
 import React from "react";
-import { preserveScreen, render } from "phileas";
+import { preserveScreen, render, setMouseReporting } from "phileas";
 import App from "./views/App.js";
 import { app, getPath } from "./server/server.js";
 import { DataBase } from "./database/DataBase.js";
@@ -17,6 +17,7 @@ export const Path = getPath(BaseURL);
 export const RootTopic = DataBase.getRootTopic();
 
 preserveScreen();
+setMouseReporting(true);
 render(
     <Provider store={store}>
         <App />

@@ -28,6 +28,12 @@ export function goToNode(node: Node) {
     };
 }
 
+export function goToClickedNode(node: Node) {
+    return () => {
+        node.control.goToNode(node.name);
+    };
+}
+
 // Because the QuestionType component need special controls
 export function useNavigation(node: Node) {
     const { useEvent } = useKeymap(questionViewKeymap);

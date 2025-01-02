@@ -11,7 +11,7 @@ import {
     useNode,
     useListItem,
 } from "phileas";
-import { useNavigation } from "./useNavigation.js";
+import { goToClickedNode, useNavigation } from "./useNavigation.js";
 import { getDecorators } from "./decorators.js";
 import { useAppDispatch, useAppSelector } from "../../../store/store.js";
 import * as Slice from "../formSlice.js";
@@ -44,7 +44,7 @@ export function MultipleChoiceDropDown(): React.ReactNode {
     const prompt = opts.length ? (multipleChoiceAnswer ?? Prompt) : "Add some options";
 
     return (
-        <Box height="100" width="100">
+        <Box height="100" width="100" onClick={goToClickedNode(node)}>
             {!modalShowing && (
                 <DropDownBox modalShowing={modalShowing}>
                     <Box

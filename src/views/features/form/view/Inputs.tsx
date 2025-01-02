@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, TextInput, useTextInput, useNode, KeyInput, useKeymap } from "phileas";
 import { getDecorators } from "./decorators.js";
-import { useNavigation } from "./useNavigation.js";
+import { goToClickedNode, useNavigation } from "./useNavigation.js";
 import { useAppDispatch, useAppSelector } from "../../../store/store.js";
 import * as Slice from "../formSlice.js";
 
@@ -38,6 +38,7 @@ export function QuestionInput(): React.ReactNode {
             titleTopLeft={{ title: "Question", color }}
             titleTopRight={{ title: title, color }}
             titleBottomRight={{ title: titleBottomRight, color }}
+            onClick={goToClickedNode(node)}
             styles={boxStyles}
         >
             <TextInput
@@ -83,6 +84,7 @@ export function AnswerInput(): React.ReactNode {
             titleTopLeft={{ title: "Answer", color }}
             titleTopRight={{ title, color }}
             titleBottomRight={{ title: titleBottomRight, color }}
+            onClick={goToClickedNode(node)}
             styles={boxStyles}
         >
             <TextInput

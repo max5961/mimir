@@ -12,7 +12,7 @@ import {
 import { useAppDispatch, useAppSelector } from "../../../store/store.js";
 import { NodeNames } from "./Form.js";
 import { getDecorators } from "./decorators.js";
-import { useNavigation } from "./useNavigation.js";
+import { goToClickedNode, useNavigation } from "./useNavigation.js";
 import * as Slice from "../formSlice.js";
 
 type Props = {
@@ -116,8 +116,9 @@ export function Opt({ id, opt }: { id: string; opt: string }): React.ReactNode {
             height={3}
             flexShrink={0}
             width="100"
-            styles={boxStyles}
             titleTopRight={{ title, color }}
+            onClick={goToClickedNode(node)}
+            styles={boxStyles}
         >
             <Text styles={textStyles}>{` ${node.name.toUpperCase()} | `}</Text>
             <TextInput onChange={onChange} textStyle={textStyles} />
@@ -155,6 +156,7 @@ export function AddButton(): React.ReactNode {
             styles={boxStyles}
             titleTopRight={{ title: title, color: color }}
             justifyContent="center"
+            onClick={goToClickedNode(node)}
         >
             <Text styles={textStyles}>{"Add + "}</Text>
         </Box>

@@ -2,9 +2,9 @@ import express from "express";
 import createHttpError from "http-errors";
 import { randomUUID } from "crypto";
 import { DataBase } from "../../database/DataBase.js";
-import TopicService from "../../services/TopicService.js";
 import { TopicModel } from "../../models/TopicModel.js";
 import { RootTopic } from "../../root.js";
+import { db } from "../../database/db.js";
 
 type Req = express.Request;
 type Res = express.Response;
@@ -32,7 +32,7 @@ function sendErr(next: Next, topicID: string): void {
 
 async function getTopicData(req: Req, res: Res, next: Next): Promise<void> {
     const topicID = req.params.topicID;
-    const data = await TopicService.getTopicDataById(topicID);
+    const data = await db.getTopicDataById(topicID);
 
     if (!data) {
         return next(createHttpError(400, topicNotFound(topicID)));
@@ -44,7 +44,7 @@ async function getTopicData(req: Req, res: Res, next: Next): Promise<void> {
 
 async function getTopic(req: Req, res: Res, next: Next): Promise<void> {
     const topicID = req.params.topicID;
-    const topic = await TopicService.getTopicById(topicID);
+    const topic = await db.getTopicById(topicID);
 
     if (!topic) {
         return next(createHttpError(400, topicNotFound(topicID)));
@@ -57,7 +57,7 @@ async function postTopics(req: Req, res: Res, next: Next): Promise<void> {
     const topicID = req.params.topicID as string;
     const newTopicNames = req.body.newTopicNames as string[];
 
-    const data = await TopicService.getTopicDataById(topicID);
+    const data = await db.getTopicDataById(topicID);
 
     if (!data) {
         return next(createHttpError(400, topicNotFound(topicID)));
@@ -97,7 +97,7 @@ async function moveTopic(req: Req, res: Res, next: Next): Promise<void> {
         dest = dest.replace(/^\.\//, "");
     }
 
-    const fileData = await TopicService.getIndexableFileData();
+    const fileData = await db.getIndexableFileData();
 
     const rootTopic = fileData.root;
     const currentTopic = fileData.topics[cwdID]?.topic;
@@ -159,7 +159,7 @@ async function moveTopic(req: Req, res: Res, next: Next): Promise<void> {
 
     await DataBase.saveDb(rootTopic);
 
-    const topicData = await TopicService.getTopicDataById(cwdID);
+    const topicData = await db.getTopicDataById(cwdID);
 
     res.status(200).json({
         currentTopic: currentTopic,

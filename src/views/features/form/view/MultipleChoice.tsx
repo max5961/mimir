@@ -105,12 +105,6 @@ export function Opt({ id, opt }: { id: string; opt: string }): React.ReactNode {
                 opt && opt.id !== id && otherValues.add(opt.value);
             });
 
-            logger.write({
-                otherValues: [...otherValues.values()],
-                id,
-                opt: opts[node.name],
-            });
-
             const hasDup = otherValues.has(value);
             const isMt = value === "";
 

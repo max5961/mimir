@@ -2,7 +2,8 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { NewQuestion } from "./formSlice.js";
 import name from "./sliceName.js";
 import { QuestionModel } from "../../../models/QuestionModel.js";
-import API from "./API.js";
+import { QuestionResponse } from "../../../routes/questions/questionsController.js";
+import { Path } from "../../../root.js";
 
 export const postQuestion = createAsyncThunk(
     `${name}/postQuestion`,
@@ -11,7 +12,22 @@ export const postQuestion = createAsyncThunk(
         { rejectWithValue },
     ) => {
         try {
-            return await API.postQuestion(topicID, question);
+            const response = await fetch(
+                `${Path.Api.Questions}/${topicID}/new-question`,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ newQuestion: question }),
+                },
+            );
+
+            if (!response.ok) {
+                return Promise.reject(response.status);
+            }
+
+            const data = await response.json();
+
+            return data as QuestionResponse.PostQuestion;
         } catch (err) {
             rejectWithValue(err);
         }
@@ -29,7 +45,22 @@ export const putQuestion = createAsyncThunk(
         { rejectWithValue },
     ) => {
         try {
-            return await API.putQuestion({ topicID, question, questionID });
+            const response = await fetch(
+                `${Path.Api.Questions}/${topicID}/edit-question/${questionID}`,
+                {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ question }),
+                },
+            );
+
+            if (!response.ok) {
+                return Promise.reject(response.status);
+            }
+
+            const data = await response.json();
+
+            return data as QuestionResponse.PutQuestion;
         } catch (err) {
             rejectWithValue(err);
         }

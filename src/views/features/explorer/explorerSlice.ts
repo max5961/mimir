@@ -125,7 +125,6 @@ const explorerSlice = createSlice({
                     state: State,
                     action: PayloadAction<QuestionResponse.PostQuestion | undefined>,
                 ) => {
-                    logger.write("fulfilled!");
                     const { payload } = action;
                     if (!payload) return;
 

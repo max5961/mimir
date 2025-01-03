@@ -5,7 +5,7 @@ import { NewQuestion } from "../../views/features/form/formSlice.js";
 import createHttpError from "http-errors";
 import { randomUUID } from "crypto";
 import { TopicResponse } from "../topics/topicsController.js";
-import { redirect } from "../../services/Redirect.js";
+import { redirect } from "../../common/redirect.js";
 
 type Req = express.Request;
 type Res = express.Response;

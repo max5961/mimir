@@ -12,7 +12,7 @@ export default function App(): React.ReactNode {
     const dispatch = useAppDispatch();
 
     useEffect(() => {
-        dispatch(ExpSlice.Actions.getTopicData({ id: RootTopic.id }));
+        dispatch(ExpSlice.Actions.getTopicData({ topicID: RootTopic.id }));
     }, []);
 
     const { pageView } = usePages(1);

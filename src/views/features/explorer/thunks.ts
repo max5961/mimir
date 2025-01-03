@@ -1,16 +1,27 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import name from "./sliceName.js";
-import API from "./API.js";
+import { TopicResponse } from "../../../routes/topics/topicsController.js";
+import { Path } from "../../../root.js";
 
 const generateTopicDataThunk = (type: string) => {
     return createAsyncThunk(
         `${name}/${type}`,
         async (
-            { id, idxTrail }: { id: string; idxTrail?: number[] },
+            { topicID, idxTrail }: { topicID: string; idxTrail?: number[] },
             { rejectWithValue },
         ) => {
             try {
-                const data = await API.getTopicData(id);
+                const response = await fetch(`${Path.Api.Topics}/data/${topicID}`, {
+                    method: "GET",
+                    headers: { "Content-Type": "application/json" },
+                });
+
+                if (!response.ok) {
+                    return Promise.reject(response.status);
+                }
+
+                const data = (await response.json()) as TopicResponse.GetTopicData;
+
                 return { ...data, idxTrail };
             } catch (err) {
                 rejectWithValue(err);
@@ -26,11 +37,21 @@ export const getPrevTopicData = generateTopicDataThunk("getPrevTopicData");
 export const postTopic = createAsyncThunk(
     `${name}/postTopic`,
     async (
-        { names, currentTopicID }: { names: string[]; currentTopicID: string },
+        { newTopicNames, topicID }: { newTopicNames: string[]; topicID: string },
         { rejectWithValue },
     ) => {
         try {
-            return await API.postTopics(currentTopicID, names);
+            const response = await fetch(`${Path.Api.Topics}/${topicID}/subtopics`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ newTopicNames }),
+            });
+
+            if (!response.ok) {
+                return Promise.reject(response.status);
+            }
+
+            return (await response.json()) as TopicResponse.PostTopics;
         } catch (err) {
             rejectWithValue(err);
         }
@@ -42,13 +63,26 @@ export const moveTopic = createAsyncThunk(
     async (
         {
             cwdID,
-            targetID,
+            subTopicID,
             destination,
-        }: { cwdID: string; targetID: string; destination: string },
+        }: { cwdID: string; subTopicID: string; destination: string },
         { rejectWithValue },
     ) => {
         try {
-            return await API.moveTopic(cwdID, targetID, destination);
+            const response = await fetch(
+                `${Path.Api.Topics}/move/${cwdID}/${subTopicID}`,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ destination }),
+                },
+            );
+
+            if (!response.ok) {
+                return Promise.reject(response.status);
+            }
+
+            return (await response.json()) as TopicResponse.MoveTopic;
         } catch (err) {
             rejectWithValue(err);
         }

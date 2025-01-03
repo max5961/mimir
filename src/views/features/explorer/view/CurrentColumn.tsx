@@ -56,7 +56,7 @@ export default function CurrentColumn(): React.ReactNode {
 
             dispatch(
                 Slice.Actions.getPrevTopicData({
-                    id: parentID,
+                    topicID: parentID,
                     idxTrail: nextTrail,
                 }),
             );
@@ -68,7 +68,7 @@ export default function CurrentColumn(): React.ReactNode {
         if (nextTopic) {
             dispatch(
                 Slice.Actions.getNextTopicData({
-                    id: nextTopic.id,
+                    topicID: nextTopic.id,
                     idxTrail: [...idxTrail, control.currentIndex],
                 }),
             );

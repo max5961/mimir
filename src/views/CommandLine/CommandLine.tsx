@@ -13,8 +13,8 @@ export default function CommandLine(): React.ReactNode {
             if (args.length) {
                 dispatch(
                     ExpSlice.Actions.postTopic({
-                        names: args,
-                        currentTopicID: currentTopic.id,
+                        newTopicNames: args,
+                        topicID: currentTopic.id,
                     }),
                 );
             }
@@ -36,7 +36,7 @@ export default function CommandLine(): React.ReactNode {
             dispatch(
                 ExpSlice.Actions.moveTopic({
                     cwdID: currentTopic.id,
-                    targetID: target.id,
+                    subTopicID: target.id,
                     destination: args[1],
                 }),
             );

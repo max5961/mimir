@@ -2,7 +2,6 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import name from "./sliceName.js";
 import { QuestionModel } from "../../../models/QuestionModel.js";
 import { randomUUID } from "crypto";
-import { logger } from "tuir";
 
 export type OptName = "a" | "b" | "c" | "d";
 export type NewQuestion = Omit<QuestionModel, "id">;
@@ -31,17 +30,14 @@ export type State = {
     // Form must contain no errors before being submitted
     errors: {
         duplicateQuestionName: boolean;
-        duplicateOpts: { a: boolean; b: boolean; c: boolean; d: boolean };
+        duplicateOpts: { [p in "a" | "b" | "c" | "d"]: boolean };
         emptyAnswerInput: boolean;
         emptyQuestionInput: boolean;
         emptyMcSelection: boolean;
-        emptyOpts: {
-            a: boolean;
-            b: boolean;
-            c: boolean;
-            d: boolean;
-        };
+        emptyOpts: { [p in "a" | "b" | "c" | "d"]: boolean };
     };
+    justAdded: { [p in "a" | "b" | "c" | "d"]: boolean };
+    showErrorsModal: boolean;
 };
 
 const initialState: State = {
@@ -58,6 +54,13 @@ const initialState: State = {
         duplicateOpts: { a: false, b: false, c: false, d: false },
         duplicateQuestionName: false,
     },
+    justAdded: {
+        a: false,
+        b: false,
+        c: false,
+        d: false,
+    },
+    showErrorsModal: false,
 };
 
 export const sliceName = "questionForm";
@@ -92,6 +95,13 @@ const questionSlice = createSlice({
                 emptyQuestionInput: true,
                 emptyAnswerInput: true,
             };
+            state.justAdded = {
+                a: false,
+                b: false,
+                c: false,
+                d: false,
+            };
+            state.showErrorsModal = false;
         },
 
         editQuestion(
@@ -119,8 +129,15 @@ const questionSlice = createSlice({
                 emptyOpts: { a: false, b: false, c: false, d: false },
                 emptyAnswerInput: false,
                 emptyQuestionInput: false,
-                emptyMcSelection: false,
+                emptyMcSelection: !!!question.multipleChoiceAnswer,
             };
+            state.justAdded = {
+                a: false,
+                b: false,
+                c: false,
+                d: false,
+            };
+            state.showErrorsModal = false;
         },
 
         // Trash all work and return to Page
@@ -143,18 +160,22 @@ const questionSlice = createSlice({
 
             if (state.question.a === undefined) {
                 state.question.a = newOpt;
+                state.justAdded.a = true;
                 return state;
             }
             if (state.question.b === undefined) {
                 state.question.b = newOpt;
+                state.justAdded.b = true;
                 return state;
             }
             if (state.question.c === undefined) {
                 state.question.c = newOpt;
+                state.justAdded.c = true;
                 return state;
             }
             if (state.question.d === undefined) {
                 state.question.d = newOpt;
+                state.justAdded.d = true;
                 return state;
             }
         },
@@ -196,7 +217,7 @@ const questionSlice = createSlice({
                 state.question[opt] = filtered[idx];
             });
 
-            // We just deleted a quesiton, so reset the drop down
+            // We just deleted a question, so reset the drop down
             state.errors.emptyMcSelection = true;
             state.question.multipleChoiceAnswer = undefined;
         },
@@ -261,6 +282,9 @@ const questionSlice = createSlice({
             if (optName === "b") state.errors.emptyOpts.b = hasError;
             if (optName === "c") state.errors.emptyOpts.c = hasError;
             if (optName === "d") state.errors.emptyOpts.d = hasError;
+        },
+        updateShowErrorsModal(state: State, action: PayloadAction<boolean>) {
+            state.showErrorsModal = action.payload;
         },
     },
 });

@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, logger, Text, useHideModal, useKeymap, useNode } from "tuir";
+import { Box, Text, useHideModal, useKeymap, useNode } from "tuir";
 import { getDecorators } from "./decorators.js";
 import { useNavigation } from "./useNavigation.js";
 import { useAppDispatch, useAppSelector } from "../../../store/store.js";
@@ -41,7 +41,7 @@ export function CancelButton(): React.ReactNode {
 
 export function SubmitButton(): React.ReactNode {
     const dispatch = useAppDispatch();
-    const form = useAppSelector(Slice.Selectors.SubmitButton);
+    const form = useAppSelector(Slice.Selectors.All);
     const currentTopic = useAppSelector(ExpSlice.Selectors.currentTopic);
     const topicID = currentTopic.id;
 
@@ -63,6 +63,7 @@ export function SubmitButton(): React.ReactNode {
                 form.errors.emptyAnswerInput ||
                 form.errors.duplicateQuestionName)
         ) {
+            dispatch(Slice.Actions.updateShowErrorsModal(true));
             return;
         }
 
@@ -80,6 +81,7 @@ export function SubmitButton(): React.ReactNode {
                 form.errors.duplicateQuestionName ||
                 form.errors.emptyMcSelection)
         ) {
+            dispatch(Slice.Actions.updateShowErrorsModal(true));
             return;
         }
 

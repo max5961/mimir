@@ -1,9 +1,12 @@
 import {
     Box,
+    HorizontalLine,
     KeyMap,
     Modal,
     Node,
     Styles,
+    Text,
+    useInput,
     useKeymap,
     useModal,
     useNodeMap,
@@ -90,6 +93,7 @@ export default function Form(): React.ReactNode {
             }}
         >
             <ModalContent />
+            <ErrorsModal />
         </Modal>
     );
 }
@@ -150,6 +154,58 @@ function ModalContent(): React.ReactNode {
                     <CancelButton />
                 </Node>
             </Box>
+        </Box>
+    );
+}
+
+function ErrorsModal(): React.ReactNode {
+    const showErrorsModal = useAppSelector(Slice.Selectors.showErrorsModal);
+
+    const { modal, showModal, hideModal } = useModal({
+        hide: null,
+        show: null,
+    });
+
+    useEffect(() => {
+        showErrorsModal ? showModal() : hideModal();
+    }, [showErrorsModal]);
+
+    return (
+        <Modal modal={modal}>
+            <ErrorsModalContent />
+        </Modal>
+    );
+}
+
+function ErrorsModalContent(): React.ReactNode {
+    const dispatch = useAppDispatch();
+    const form = useAppSelector(Slice.Selectors.All);
+
+    useInput(() => {
+        dispatch(Slice.Actions.updateShowErrorsModal(false));
+    });
+
+    const errors: string[] = [];
+    form.errors.emptyQuestionInput && errors.push("Empty question");
+    form.errors.duplicateQuestionName && errors.push("Duplicate question");
+
+    if (form.question.type === "mc") {
+        form.errors.emptyMcSelection && errors.push("Empty multiple choice selection");
+        Object.values(form.errors.duplicateOpts).some((isDup) => isDup) &&
+            errors.push("Options have duplicates");
+        Object.values(form.errors.emptyOpts).some((isMt) => isMt) &&
+            errors.push("Option(s) are empty");
+    } else {
+        form.errors.emptyAnswerInput && errors.push("Empty answer");
+    }
+
+    return (
+        <Box borderStyle="round" borderColor={Colors.Error} flexDirection="column">
+            <Text>Fix these errors before submitting!</Text>
+            <HorizontalLine />
+            {errors.map((error) => {
+                return <Text key={error}>{`⦁ ${error}`}</Text>;
+            })}
         </Box>
     );
 }

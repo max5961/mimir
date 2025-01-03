@@ -27,6 +27,7 @@ export const answerInputReturnAction = (state: RootState) =>
     state.form.answerInputReturnAction;
 
 // Errors
+export const showErrorsModal = (state: RootState) => state.form.showErrorsModal;
 export const emptyMcSelection = (state: RootState) => state.form.errors.emptyMcSelection;
 export const emptyQuestionInput = (state: RootState) =>
     state.form.errors.emptyQuestionInput;
@@ -50,6 +51,18 @@ export const duplicateOpts = createSelector(
         (state: RootState) => state.form.errors.duplicateOpts.b,
         (state: RootState) => state.form.errors.duplicateOpts.c,
         (state: RootState) => state.form.errors.duplicateOpts.d,
+    ],
+    (a, b, c, d) => {
+        return { a, b, c, d };
+    },
+);
+
+export const justAdded = createSelector(
+    [
+        (state: RootState) => state.form.justAdded.a,
+        (state: RootState) => state.form.justAdded.b,
+        (state: RootState) => state.form.justAdded.c,
+        (state: RootState) => state.form.justAdded.d,
     ],
     (a, b, c, d) => {
         return { a, b, c, d };
@@ -120,9 +133,10 @@ export const MultipleChoice = createSelector(
 );
 
 export const Opt = createSelector(
-    [opts, emptyOpts, duplicateOpts],
-    (opts, emptyOpts, duplicateOpts) => {
+    [opts, emptyOpts, duplicateOpts, justAdded],
+    (opts, emptyOpts, duplicateOpts, justAdded) => {
         return {
+            justAdded,
             opts,
             hasErrors(name: string) {
                 return emptyOpts[name] || duplicateOpts[name];
@@ -130,6 +144,10 @@ export const Opt = createSelector(
         };
     },
 );
+
+export const AddButton = createSelector([opts, justAdded], (opts, justAdded) => {
+    return { opts, justAdded };
+});
 
 export const DropDown = createSelector(
     [opts, multipleChoiceAnswer],
@@ -145,6 +163,8 @@ export const DropDown = createSelector(
     },
 );
 
-export const Everything = (state: RootState) => state.form;
+export const ErrorsModal = (state: RootState) => state.form.errors;
+
+export const All = (state: RootState) => state.form;
 
 export const SubmitButton = (state: RootState) => state.form;

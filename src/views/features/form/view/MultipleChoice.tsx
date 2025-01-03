@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import {
     Box,
+    logger,
     Node,
     Text,
     TextInput,
@@ -14,6 +15,7 @@ import { NodeNames } from "./Form.js";
 import { getDecorators } from "./decorators.js";
 import { goToClickedNode, useNavigation } from "./useNavigation.js";
 import * as Slice from "../formSlice.js";
+import { emptyOpts } from "../selectors.js";
 
 type Props = {
     register: ReturnType<typeof useNodeMap<NodeNames>>["register"];
@@ -57,7 +59,7 @@ export default function MultipleChoice({ register }: Props): React.ReactNode {
 
 export function Opt({ id, opt }: { id: string; opt: string }): React.ReactNode {
     const dispatch = useAppDispatch();
-    const { opts, hasErrors } = useAppSelector(Slice.Selectors.Opt);
+    const { opts, justAdded, hasErrors } = useAppSelector(Slice.Selectors.Opt);
 
     // Handle navigation
     const node = useNode();
@@ -72,22 +74,27 @@ export function Opt({ id, opt }: { id: string; opt: string }): React.ReactNode {
     // Handle text input
     const { onChange, setValue, value, enterInsert, insert } = useTextInput(opt ?? "");
 
+    // Go straight into insert mode, but only if we just created this opt.
+    const optJustAdded = justAdded[node.name];
+    useEffect(() => {
+        if (optJustAdded) {
+            enterInsert();
+        }
+    }, [optJustAdded]);
+
     // Since opts cascade towards the beginning of the alphabet, when the id changes
     // we know we need to change the value
     useEffect(() => {
         setValue(opt);
     }, [id]);
 
-    // Go straight into insert mode, but only if we just created this opt.
-    const shouldDisplay = opts[node.name] !== undefined;
-    useEffect(() => {
-        if (shouldDisplay) {
-            enterInsert();
-        }
-    }, [shouldDisplay]);
-
     // Whenever the value changes, or the opts change, update errors.  Errors
     // occur when the opt doesn't have a unique value among the others.
+    useEffect(() => {
+        const optName = node.name as Slice.OptName;
+        dispatch(Slice.Actions.updateOptValue({ optName, value }));
+    }, [value]);
+
     useEffect(() => {
         if (opt !== undefined) {
             const optName = node.name as Slice.OptName;
@@ -98,13 +105,19 @@ export function Opt({ id, opt }: { id: string; opt: string }): React.ReactNode {
                 opt && opt.id !== id && otherValues.add(opt.value);
             });
 
-            const hasError = otherValues.has(value) || value === "";
+            logger.write({
+                otherValues: [...otherValues.values()],
+                id,
+                opt: opts[node.name],
+            });
 
-            dispatch(Slice.Actions.updateDuplicateOpt({ optName, hasError }));
-            // Update the value too so that opts are updated and other opts check for errors as well
-            dispatch(Slice.Actions.updateOptValue({ optName, value }));
+            const hasDup = otherValues.has(value);
+            const isMt = value === "";
+
+            dispatch(Slice.Actions.updateEmptyOptsInput({ optName, hasError: isMt }));
+            dispatch(Slice.Actions.updateDuplicateOpt({ optName, hasError: hasDup }));
         }
-    }, [value, opts]);
+    }, [opts, value, id]);
 
     // Apply styles
     const { title, boxStyles, textStyles, color } = getDecorators(node, {

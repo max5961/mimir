@@ -1,4 +1,4 @@
-import { Styles } from "phileas";
+import { Styles } from "tuir";
 import { Colors } from "../../../globals.js";
 
 export const EStyles: { MaxDim: Styles["Box"]; ColumnBox: Styles["Box"] } = {

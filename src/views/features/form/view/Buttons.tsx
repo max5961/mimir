@@ -1,9 +1,14 @@
 import React from "react";
-import { Box, Text, useNode } from "phileas";
+import { Box, logger, Text, useHideModal, useKeymap, useNode } from "tuir";
 import { getDecorators } from "./decorators.js";
-import { goToClickedNode, useNavigation } from "./useNavigation.js";
+import { useNavigation } from "./useNavigation.js";
+import { useAppDispatch, useAppSelector } from "../../../store/store.js";
+import * as Slice from "../formSlice.js";
+import * as ExpSlice from "../../explorer/explorerSlice.js";
 
 export function CancelButton(): React.ReactNode {
+    const dispatch = useAppDispatch();
+    const { hideModal } = useHideModal();
     const node = useNode();
     useNavigation(node);
 
@@ -12,6 +17,14 @@ export function CancelButton(): React.ReactNode {
         insert: false,
         type: "button",
     });
+
+    const cancel = () => {
+        dispatch(Slice.Actions.cancelQuestion());
+        hideModal();
+    };
+
+    const { useEvent } = useKeymap({ cancel: { key: "return" } });
+    useEvent("cancel", cancel);
 
     return (
         <Box
@@ -19,7 +32,7 @@ export function CancelButton(): React.ReactNode {
             styles={boxStyles}
             paddingX={10}
             titleTopRight={{ title, color }}
-            onClick={goToClickedNode(node)}
+            onClick={cancel}
         >
             <Text styles={textStyles}>Cancel</Text>
         </Box>
@@ -27,8 +40,15 @@ export function CancelButton(): React.ReactNode {
 }
 
 export function SubmitButton(): React.ReactNode {
+    const dispatch = useAppDispatch();
+    const form = useAppSelector(Slice.Selectors.SubmitButton);
+    const currentTopic = useAppSelector(ExpSlice.Selectors.currentTopic);
+    const topicID = currentTopic.id;
+
     const node = useNode();
     useNavigation(node);
+
+    const { hideModal } = useHideModal();
 
     const { title, boxStyles, color, textStyles } = getDecorators(node, {
         hasErrors: false,
@@ -36,13 +56,68 @@ export function SubmitButton(): React.ReactNode {
         type: "button",
     });
 
+    function handleSubmit() {
+        if (
+            form.question.type !== "mc" &&
+            (form.errors.emptyQuestionInput ||
+                form.errors.emptyAnswerInput ||
+                form.errors.duplicateQuestionName)
+        ) {
+            return;
+        }
+
+        if (
+            form.question.type === "mc" &&
+            (form.errors.emptyOpts.a ||
+                form.errors.emptyOpts.b ||
+                form.errors.emptyOpts.c ||
+                form.errors.emptyOpts.d ||
+                form.errors.duplicateOpts.a ||
+                form.errors.duplicateOpts.b ||
+                form.errors.duplicateOpts.c ||
+                form.errors.duplicateOpts.d ||
+                form.errors.emptyQuestionInput ||
+                form.errors.duplicateQuestionName ||
+                form.errors.emptyMcSelection)
+        ) {
+            return;
+        }
+
+        // Hide the modal then send the fetch requests
+        hideModal();
+
+        if (form.method === "POST") {
+            dispatch(
+                Slice.Thunks.postQuestion({
+                    topicID,
+                    question: form.question,
+                }),
+            );
+        }
+
+        if (form.method === "PUT") {
+            if (form.question.id) {
+                dispatch(
+                    Slice.Thunks.putQuestion({
+                        topicID,
+                        question: { ...form.question, id: form.question.id },
+                        questionID: form.question.id,
+                    }),
+                );
+            }
+        }
+    }
+
+    const { useEvent } = useKeymap({ handleSubmit: { key: "return" } });
+    useEvent("handleSubmit", handleSubmit);
+
     return (
         <Box
             height={3}
             styles={boxStyles}
             paddingX={10}
             titleTopRight={{ title: title, color: color }}
-            onClick={goToClickedNode(node)}
+            onClick={handleSubmit}
         >
             <Text styles={textStyles}>Submit</Text>
         </Box>

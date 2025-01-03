@@ -1,4 +1,3 @@
-import { logger } from "phileas";
 import { DataBase, RootTopicName } from "../database/DataBase.js";
 import { IndexableFileData } from "../database/IndexableFileData.js";
 import { TopicModel } from "../models/TopicModel.js";

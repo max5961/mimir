@@ -11,7 +11,7 @@ export const RootTopicName = "$$ROOT";
 /*
  * Reads the json file (Topic) and converts it into a TopicIndexModel object
  * */
-async function openDb(): Promise<IndexableFileData> {
+export async function openDb(): Promise<IndexableFileData> {
     const contents = await fs.readFile(DataBasePath, { encoding: "utf-8" });
     const root = JSON.parse(contents) as TopicModel;
 
@@ -41,7 +41,7 @@ async function openDb(): Promise<IndexableFileData> {
 /*
  * Save just the root.  The indexed tree isn't written.
  * */
-async function saveDb(root: TopicModel): Promise<void> {
+export async function saveDb(root: TopicModel): Promise<void> {
     const data = JSON.stringify(root, null, 4);
     return await fs.writeFile(DataBasePath, data, { encoding: "utf-8" });
 }
@@ -49,7 +49,7 @@ async function saveDb(root: TopicModel): Promise<void> {
 /*
  * Checks for/creates a json file to read and write data from.
  * */
-function initializeDataBase(): void {
+export function initializeDataBase(): void {
     const rootTopic: TopicModel = {
         id: randomUUID(),
         name: RootTopicName,
@@ -77,10 +77,14 @@ function initializeDataBase(): void {
  * Synchronously gets a pointer to the root so that we have the initialization
  * data before the app first renders.
  * */
-function getRootTopic(): TopicModel {
+export function getRootTopic(): TopicModel {
     const json = readFileSync(DataBasePath, { encoding: "utf-8" });
     const root = JSON.parse(json) as TopicModel;
     return root;
+}
+
+class Db {
+    //
 }
 
 export const DataBase = {

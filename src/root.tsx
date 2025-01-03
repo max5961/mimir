@@ -1,6 +1,6 @@
 import "./env/Env.js";
 import React from "react";
-import { preserveScreen, render, setMouseReporting } from "phileas";
+import { preserveScreen, render, setMouseReporting } from "tuir";
 import App from "./views/App.js";
 import { app, getPath } from "./server/server.js";
 import { DataBase } from "./database/DataBase.js";

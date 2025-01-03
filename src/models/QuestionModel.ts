@@ -16,7 +16,7 @@ export type MultipleChoice = {
 export type QuestionAnswer = {
     id: string;
     question: string;
-    answer: string;
+    answer?: string;
 
     // These will never be assigned, but exist only so that this type can be combined
     // with MultipleChoice

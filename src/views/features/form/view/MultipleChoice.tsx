@@ -8,7 +8,7 @@ import {
     useNode,
     useNodeMap,
     useTextInput,
-} from "phileas";
+} from "tuir";
 import { useAppDispatch, useAppSelector } from "../../../store/store.js";
 import { NodeNames } from "./Form.js";
 import { getDecorators } from "./decorators.js";
@@ -57,14 +57,16 @@ export default function MultipleChoice({ register }: Props): React.ReactNode {
 
 export function Opt({ id, opt }: { id: string; opt: string }): React.ReactNode {
     const dispatch = useAppDispatch();
-    const { opts, invalidOpts } = useAppSelector(Slice.Selectors.Opt);
+    const { opts, hasErrors } = useAppSelector(Slice.Selectors.Opt);
+
+    // Handle navigation
     const node = useNode();
     useNavigation(node);
 
     // Handle deletion.
     const { useEvent } = useKeymap({ deleteOpt: { input: "dd" } });
     useEvent("deleteOpt", () => {
-        dispatch(Slice.Actions.deleteMultipleChoiceOpt(node.name as Slice.OptName));
+        dispatch(Slice.Actions.deleteOpt(node.name as Slice.OptName));
     });
 
     // Handle text input
@@ -98,15 +100,15 @@ export function Opt({ id, opt }: { id: string; opt: string }): React.ReactNode {
 
             const hasError = otherValues.has(value) || value === "";
 
+            dispatch(Slice.Actions.updateDuplicateOpt({ optName, hasError }));
             // Update the value too so that opts are updated and other opts check for errors as well
-            dispatch(Slice.Actions.updateMultipleChoiceValue({ optName, value }));
-            dispatch(Slice.Actions.updateMultipleChoiceErrors({ optName, hasError }));
+            dispatch(Slice.Actions.updateOptValue({ optName, value }));
         }
     }, [value, opts]);
 
     // Apply styles
     const { title, boxStyles, textStyles, color } = getDecorators(node, {
-        hasErrors: invalidOpts[node.name],
+        hasErrors: hasErrors(node.name),
         insert,
         type: "line",
     });
@@ -135,7 +137,7 @@ export function AddButton(): React.ReactNode {
 
     const { useEvent } = useKeymap({ pushMcQuestion: { key: "return" } });
     useEvent("pushMcQuestion", () => {
-        dispatch(Slice.Actions.addMultipleChoiceInput());
+        dispatch(Slice.Actions.addMcInput());
     });
 
     const shouldRender = Object.values(opts).some((opt) => opt === undefined);

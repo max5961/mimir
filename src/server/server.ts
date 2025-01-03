@@ -2,7 +2,7 @@ import express from "express";
 import { topicsRoute } from "../routes/topics/topicsRoute.js";
 import createHttpError from "http-errors";
 import { log } from "./middleware.js";
-import { logger } from "phileas";
+import { logger } from "tuir";
 import { questionsRoute } from "../routes/questions/questionsRoute.js";
 
 export const getPath = (baseURL: string) => {

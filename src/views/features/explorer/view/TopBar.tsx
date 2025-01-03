@@ -1,5 +1,5 @@
 import React from "react";
-import { Styles, Box, Text } from "phileas";
+import { Styles, Box, Text } from "tuir";
 import { Colors } from "../../../globals.js";
 import { useAppSelector } from "../../../store/store.js";
 import * as Slice from "../explorerSlice.js";

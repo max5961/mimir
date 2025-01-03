@@ -10,7 +10,7 @@ import {
     useHideModal,
     useNode,
     useListItem,
-} from "phileas";
+} from "tuir";
 import { goToClickedNode, useNavigation } from "./useNavigation.js";
 import { getDecorators } from "./decorators.js";
 import { useAppDispatch, useAppSelector } from "../../../store/store.js";
@@ -142,10 +142,10 @@ type DDBoxProps = { modalShowing: boolean } & React.PropsWithChildren;
 
 function DropDownBox({ modalShowing, children }: DDBoxProps): React.ReactNode {
     const node = useNode();
-    const error = useAppSelector(Slice.Selectors.multipleChoiceDropDownError);
+    const hasNoSelection = useAppSelector(Slice.Selectors.emptyMcSelection);
 
     const { boxStyles, color, marker } = getDecorators(node, {
-        hasErrors: error,
+        hasErrors: hasNoSelection,
         insert: false,
         type: "button",
     });

@@ -1,5 +1,5 @@
-import React from "react";
-import { Box, TextInput, useTextInput, useNode, KeyInput, useKeymap } from "phileas";
+import React, { useEffect } from "react";
+import { Box, TextInput, useTextInput, useNode, KeyInput, useKeymap, logger } from "tuir";
 import { getDecorators } from "./decorators.js";
 import { goToClickedNode, useNavigation } from "./useNavigation.js";
 import { useAppDispatch, useAppSelector } from "../../../store/store.js";
@@ -7,9 +7,12 @@ import * as Slice from "../formSlice.js";
 
 export function QuestionInput(): React.ReactNode {
     const dispatch = useAppDispatch();
-    const returnAction = useAppSelector(Slice.Selectors.questionInputReturnAction);
+    const { returnAction, existingNamesSet, hasErrors, question } = useAppSelector(
+        Slice.Selectors.QuestionInput,
+    );
+
     const node = useNode();
-    const { onChange, insert } = useTextInput();
+    const { onChange, insert, value } = useTextInput(question);
     useNavigation(node);
 
     const { useEvent } = useKeymap({ toggle: { key: "ctrl", input: "t" } });
@@ -25,11 +28,18 @@ export function QuestionInput(): React.ReactNode {
     );
 
     const { color, title, boxStyles, textStyles } = getDecorators(node, {
-        hasErrors: false,
+        hasErrors,
         insert,
         type: "area",
         returnAction,
     });
+
+    useEffect(() => {
+        const isDup = existingNamesSet.has(value);
+        dispatch(Slice.Actions.updateDuplicateQuestionName(isDup));
+        dispatch(Slice.Actions.updateEmptyQuestionInput(value === ""));
+        dispatch(Slice.Actions.updateQuestion(value));
+    }, [value]);
 
     return (
         <Box
@@ -53,8 +63,12 @@ export function QuestionInput(): React.ReactNode {
 
 export function AnswerInput(): React.ReactNode {
     const dispatch = useAppDispatch();
-    const returnAction = useAppSelector(Slice.Selectors.answerInputReturnAction);
-    const { onChange, insert } = useTextInput();
+    const { returnAction, hasErrors, answer } = useAppSelector(
+        Slice.Selectors.AnswerInput,
+    );
+    const { onChange, insert, value } = useTextInput(answer);
+
+    // navigation
     const node = useNode();
     useNavigation(node);
 
@@ -71,11 +85,16 @@ export function AnswerInput(): React.ReactNode {
     );
 
     const { title, color, boxStyles, textStyles } = getDecorators(node, {
-        hasErrors: false,
+        hasErrors,
         insert,
         type: "area",
         returnAction,
     });
+
+    useEffect(() => {
+        dispatch(Slice.Actions.updateAnswer(value));
+        dispatch(Slice.Actions.updateEmptyAnswerInput(value === ""));
+    }, [value]);
 
     return (
         <Box

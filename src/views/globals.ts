@@ -1,4 +1,4 @@
-import { Color } from "phileas";
+import { Color } from "tuir";
 
 type Colors = {
     Primary: Color;

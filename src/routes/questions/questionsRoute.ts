@@ -6,4 +6,5 @@ export const questionsRoute = express.Router();
 
 questionsRoute
     .get("/:questionID", asyncHandler(Controller.getQuestion))
-    .post("/:topicID/create", asyncHandler(Controller.postQuestion));
+    .post("/:topicID/new-question", asyncHandler(Controller.postQuestion))
+    .put("/:topicID/edit-question/:questionID", asyncHandler(Controller.putQuestion));

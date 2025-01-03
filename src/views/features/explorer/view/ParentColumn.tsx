@@ -1,5 +1,5 @@
 import React from "react";
-import { useList, List, Box } from "phileas";
+import { useList, List, Box } from "tuir";
 import { Colors } from "../../../globals.js";
 import { useAppSelector } from "../../../store/store.js";
 import { EStyles } from "./style.js";

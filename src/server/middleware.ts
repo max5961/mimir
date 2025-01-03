@@ -1,5 +1,5 @@
 import express from "express";
-import { Logger } from "phileas";
+import { Logger } from "tuir";
 
 type Res = express.Response;
 type Req = express.Request;

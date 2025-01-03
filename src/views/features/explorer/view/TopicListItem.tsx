@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Text } from "phileas";
+import { Box, Text } from "tuir";
 import { TopicModel } from "../../../../models/TopicModel.js";
 import { Colors } from "../../../globals.js";
 
@@ -23,11 +23,11 @@ export default function TopicListItem({
     return (
         <Box width="100" backgroundColor={bgColor} flexShrink={0}>
             <Box height={1} width={2} backgroundColor="inherit" flexShrink={0}>
-                <Text color={iconColor} wrap="truncate-end">
+                <Text color={iconColor} wrap="overflow">
                     {"☰ "}
                 </Text>
             </Box>
-            <Box height={1} backgroundColor="inherit">
+            <Box height={1} backgroundColor="inherit" width="100">
                 <Text bold color={textColor} wrap="truncate-end">
                     {topic.name}
                 </Text>

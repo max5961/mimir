@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Cli, Commands, logger } from "phileas";
+import { Box, Cli, Commands, logger } from "tuir";
 import { useAppDispatch, useAppSelector } from "../store/store.js";
 import { TopicModel } from "../../models/TopicModel.js";
 import * as ExpSlice from "../features/explorer/explorerSlice.js";
@@ -23,7 +23,6 @@ export default function CommandLine(): React.ReactNode {
             if (!args[0] || !args[1]) return Promise.reject("mv: missing arguments");
 
             let target: TopicModel | undefined = currentTopic.subTopics[currentIndex];
-            logger.write(currentIndex);
             if (!args[0].match(/^"\$|^'\$|^\$/)) {
                 target = currentTopic.subTopics.find(
                     (subTopic) => subTopic.name === args[0],

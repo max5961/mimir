@@ -1,4 +1,4 @@
-import { KeyMap, useKeymap, useNode } from "phileas";
+import { KeyMap, useKeymap, useNode } from "tuir";
 
 type Node = ReturnType<typeof useNode>;
 

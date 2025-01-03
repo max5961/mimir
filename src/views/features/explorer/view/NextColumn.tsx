@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Text, HorizontalLine } from "phileas";
+import { Box, Text, HorizontalLine } from "tuir";
 import { Colors } from "../../../globals.js";
 import { useAppSelector } from "../../../store/store.js";
 import { EStyles } from "./style.js";

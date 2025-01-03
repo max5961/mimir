@@ -8,7 +8,7 @@ import {
     useModal,
     useNodeMap,
     useStdout,
-} from "phileas";
+} from "tuir";
 import React, { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../../store/store.js";
 import { Colors } from "../../../globals.js";
@@ -22,19 +22,36 @@ import { MultipleChoiceDropDown } from "./MultipleChoiceDropDown.js";
 
 const QuestionViewKeymap = {
     createNewQuestion: { input: "a" },
+    editQuestion: { input: "e" },
 } as const satisfies KeyMap;
 
 export default function Form(): React.ReactNode {
     const dispatch = useAppDispatch();
+    const { currentPath, existingNames, nextQuestion } = useAppSelector(
+        ExpSlice.Selectors.NewForm,
+    );
     const { stdout } = useStdout();
-    let { currentPath } = useAppSelector(ExpSlice.Selectors.currentPath);
     const { modal, showModal } = useModal({ show: null, hide: null });
 
     const { useEvent } = useKeymap(QuestionViewKeymap);
 
     useEvent("createNewQuestion", () => {
+        dispatch(Slice.Actions.createNewQuestion(existingNames));
         showModal();
-        dispatch(Slice.Actions.createNewQuestion());
+    });
+
+    useEvent("editQuestion", () => {
+        if (!nextQuestion) return;
+
+        const omitted = existingNames.filter((name) => name !== nextQuestion.question);
+
+        dispatch(
+            Slice.Actions.editQuestion({
+                question: nextQuestion,
+                existingNames: omitted,
+            }),
+        );
+        showModal();
     });
 
     const [hw, setHw] = useState({ h: stdout.rows, w: stdout.columns });

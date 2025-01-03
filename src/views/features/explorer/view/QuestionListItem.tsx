@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Text } from "phileas";
+import { Box, Text } from "tuir";
 import { QuestionModel } from "../../../../models/QuestionModel.js";
 import { Colors } from "../../../globals.js";
 
@@ -23,7 +23,7 @@ export default function QuestionListItem({
     return (
         <Box width="100" backgroundColor={bgColor}>
             <Box height={1} width={2} backgroundColor="inherit" flexShrink={0}>
-                <Text color={iconColor} wrap="truncate-end">
+                <Text color={iconColor} wrap="overflow">
                     {"∘ "}
                 </Text>
             </Box>

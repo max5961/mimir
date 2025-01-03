@@ -1,4 +1,4 @@
-import { Logger } from "phileas";
+import { Logger } from "tuir";
 
 const logger = new Logger();
 logger.setFile("store.log");
@@ -15,12 +15,21 @@ export const storeLogger =
     };
 
 export const formLogger =
-    ({ active }: { active: boolean }) =>
+    ({
+        active,
+        dispatch = true,
+        nextState = true,
+    }: {
+        active: boolean;
+        dispatch?: boolean;
+        nextState?: boolean;
+    }) =>
     (store: any) =>
     (next: any) =>
     (action: any) => {
-        active && logger.write("DISPATCHING", action);
+        active && dispatch && logger.write("DISPATCHING", action);
         const result = next(action);
-        active && logger.write("NEXT STATE", store.getState().form);
+
+        active && nextState && logger.write("NEXT STATE", store.getState().form);
         return result;
     };

@@ -13,7 +13,7 @@ const store = configureStore({
         return getDefaultMiddleware().concat(
             // storeLogger({ active: NodeEnv === "development" }),
             // storeLogger({ active: true }),
-            formLogger({ active: true }),
+            formLogger({ active: true, dispatch: true, nextState: true }),
         );
     },
 });

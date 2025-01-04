@@ -1,8 +1,7 @@
 import express from "express";
 import { topicsRoute } from "../routes/topics/topicsRoute.js";
 import createHttpError from "http-errors";
-import { log } from "./middleware.js";
-import { logger } from "tuir";
+import { log, serverLogger } from "./middleware.js";
 import { questionsRoute } from "../routes/questions/questionsRoute.js";
 
 export const getPath = (baseURL: string) => {
@@ -37,7 +36,7 @@ app.use(
     ) => {
         const status = err.status || 500;
         const message = err.message || "Unknown Error occured";
-        logger.file("server.log").color("red").write(`RESPONSE ERROR`, message);
+        serverLogger.color("red").write(`RESPONSE ERROR`, message);
 
         res.status(status).send(message);
     },

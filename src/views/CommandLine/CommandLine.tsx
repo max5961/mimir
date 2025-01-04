@@ -27,7 +27,7 @@ export default function CommandLine(): React.ReactNode {
             if (!args[0] || !args[1]) return Promise.reject("mv: missing arguments");
 
             let target: TopicModel | undefined = currentTopic.subTopics[currentIndex];
-            if (!args[0].match(/^"\$|^'\$|^\$/)) {
+            if (!isVariable(args[0])) {
                 target = currentTopic.subTopics.find(
                     (subTopic) => subTopic.name === args[0],
                 );
@@ -48,7 +48,19 @@ export default function CommandLine(): React.ReactNode {
         ["delete"]: async (args) => {
             const force = args.includes("--force") || args.includes("-f");
 
-            if (nextTopic) {
+            const names = args
+                .filter((arg) => arg !== "--force" && arg !== "-f")
+                .map((arg) => {
+                    if (isVariable(arg)) {
+                        return nextTopic?.name || nextQuestion?.question || "";
+                    } else {
+                        return arg;
+                    }
+                });
+
+            logger.write({ names });
+
+            if (!names.length && nextTopic) {
                 if (nextTopic.subTopics.length || nextTopic.questions.length) {
                     if (!force) {
                         return Promise.reject(
@@ -65,12 +77,35 @@ export default function CommandLine(): React.ReactNode {
                 );
             }
 
-            if (nextQuestion) {
-                dispatch(
+            if (!names.length && nextQuestion) {
+                return dispatch(
                     ExpSlice.Actions.deleteQuestion({
                         topicID: currentTopic.id,
                         questionID: nextQuestion.id,
                     }),
+                );
+            }
+
+            const set = new Set(names);
+            const hasNonEmpty = currentTopic.subTopics.some((subTopic) => {
+                return (
+                    set.has(subTopic.name) &&
+                    subTopic.questions.length &&
+                    subTopic.subTopics.length
+                );
+            });
+
+            dispatch(
+                ExpSlice.Actions.deleteMany({
+                    topicID: currentTopic.id,
+                    names,
+                    force,
+                }),
+            );
+
+            if (hasNonEmpty && !force) {
+                return Promise.reject(
+                    "Some topics are not empty.  Use the --force or -f flag to remove them",
                 );
             }
         },
@@ -98,4 +133,8 @@ export default function CommandLine(): React.ReactNode {
             />
         </Box>
     );
+}
+
+function isVariable(arg: string): boolean {
+    return !!arg.match(/^"\$|^'\$|^\$/);
 }

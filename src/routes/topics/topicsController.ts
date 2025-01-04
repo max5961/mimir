@@ -22,7 +22,10 @@ export namespace TopicResponse {
     export type PostTopics = GetTopicData;
     export type MoveTopic = GetTopicData;
     export type DeleteTopic = GetTopicData;
+    export type DeleteMany = GetTopicData;
 }
+
+const topicDataRoute = (topicID: string) => `/api/topics/data/${topicID}`;
 
 function topicNotFound(id: string): { message: string } {
     return { message: `TopicModel with id '${id}' not found.` };
@@ -88,20 +91,6 @@ async function deleteTopic(req: Req, res: Res, next: Next) {
     const topicID = req.params.topicID as string;
     const subTopicID = req.params.subTopicID as string;
 
-    // const data = await db.getTopicDataById(topicID);
-    //
-    // if (!data) {
-    //     return next(createHttpError(400, topicNotFound(topicID)));
-    // }
-    //
-    // data.currentTopic.subTopics = data.currentTopic.subTopics.filter(
-    //     (subTopic) => subTopic.id !== subTopicID,
-    // );
-    //
-    // const { rootTopic, ...topics } = data;
-    // await DataBase.saveDb(rootTopic);
-    // res.status(200).json(topics);
-
     const data = await DataBase.openDb();
 
     const topic = data.topics[topicID]?.topic;
@@ -114,7 +103,42 @@ async function deleteTopic(req: Req, res: Res, next: Next) {
 
     await DataBase.saveDb(data.root);
 
-    redirect(req, res, `/api/topics/data/${topicID}`);
+    redirect(req, res, topicDataRoute(topicID));
+}
+
+async function deleteMany(req: Req, res: Res, next: Next) {
+    const topicID = req.params.topicID as string;
+    const names = req.body.names as string[];
+    const force = req.body.force as boolean;
+
+    const data = await DataBase.openDb();
+
+    const topic = data.topics[topicID]?.topic;
+
+    if (!topic) {
+        return next(createHttpError(404, topicNotFound(topicID)));
+    }
+
+    const set = new Set(names);
+
+    topic.subTopics = topic.subTopics.filter((subTopic) => {
+        if (force) {
+            // Filter subTopic indiscriminately
+            return !set.has(subTopic.name);
+        } else {
+            // Filter subTopics only if they have no content
+            return (
+                !set.has(subTopic.name) ||
+                subTopic.subTopics.length ||
+                subTopic.questions.length
+            );
+        }
+    });
+    topic.questions = topic.questions.filter((question) => !set.has(question.question));
+
+    await DataBase.saveDb(data.root);
+
+    redirect(req, res, topicDataRoute(topicID));
 }
 
 async function moveTopic(req: Req, res: Res, next: Next): Promise<void> {
@@ -209,4 +233,5 @@ export default {
     postTopics,
     moveTopic,
     deleteTopic,
+    deleteMany,
 };

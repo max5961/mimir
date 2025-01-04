@@ -123,16 +123,43 @@ export const deleteTopic = createAsyncThunk(
         { rejectWithValue },
     ) => {
         try {
-            const response = await fetch(`${Path.Api.Topics}/${topicID}/${subTopicID}`, {
-                method: "DELETE",
-                headers: { "Content-Type": "application/json" },
-            });
+            const response = await fetch(
+                `${Path.Api.Topics}/subTopic/${topicID}/${subTopicID}`,
+                {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                },
+            );
 
             if (!response.ok) {
                 return Promise.reject(response.status);
             }
 
             return (await response.json()) as TopicResponse.DeleteTopic;
+        } catch (err) {
+            rejectWithValue(err);
+        }
+    },
+);
+
+export const deleteMany = createAsyncThunk(
+    `${name}/deleteMany`,
+    async (
+        { topicID, names, force }: { topicID: string; names: string[]; force: boolean },
+        { rejectWithValue },
+    ) => {
+        try {
+            const response = await fetch(`${Path.Api.Topics}/many/${topicID}`, {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ names, force }),
+            });
+
+            if (!response.ok) {
+                return Promise.reject(response.status);
+            }
+
+            return (await response.json()) as TopicResponse.DeleteMany;
         } catch (err) {
             rejectWithValue(err);
         }

@@ -9,4 +9,5 @@ topicsRoute
     .get("/data/:topicID", asyncHandler(Controller.getTopicData))
     .post("/:topicID/subtopics", asyncHandler(Controller.postTopics))
     .post("/move/:cwdID/:subTopicID", asyncHandler(Controller.moveTopic))
-    .delete("/:topicID/:subTopicID", asyncHandler(Controller.deleteTopic));
+    .delete("/subTopic/:topicID/:subTopicID", asyncHandler(Controller.deleteTopic))
+    .delete("/many/:topicID", asyncHandler(Controller.deleteMany));

@@ -10,16 +10,18 @@ import {
     useHideModal,
     useNode,
     useListItem,
+    logger,
 } from "tuir";
 import { goToClickedNode, useNavigation } from "./useNavigation.js";
 import { getDecorators } from "./decorators.js";
 import { useAppDispatch, useAppSelector } from "../../../store/store.js";
 import * as Slice from "../formSlice.js";
+import { MultipleChoiceOpt } from "../../../../models/QuestionModel.js";
 
 const Prompt = "Choose an option";
 
 export function MultipleChoiceDropDown(): React.ReactNode {
-    const { multipleChoiceAnswer, opts } = useAppSelector(Slice.Selectors.DropDown);
+    const { answerId, opts } = useAppSelector(Slice.Selectors.DropDown);
     const node = useNode();
     useNavigation(node);
     const { modal, showModal } = useModal({
@@ -41,7 +43,9 @@ export function MultipleChoiceDropDown(): React.ReactNode {
         }
     });
 
-    const prompt = opts.length ? (multipleChoiceAnswer ?? Prompt) : "Add some options";
+    const answerValue = opts.find((opt) => opt.id === answerId)?.value;
+
+    const prompt = opts.length ? (answerValue ?? Prompt) : "Add some options";
 
     return (
         <Box height="100" width="100" onClick={goToClickedNode(node)}>
@@ -62,6 +66,9 @@ export function MultipleChoiceDropDown(): React.ReactNode {
                 justifySelf="flex-start"
                 alignSelf="flex-start"
                 width="100"
+                onClick={() => {
+                    goToClickedNode(node);
+                }}
             >
                 <DropDownBox modalShowing={modalShowing}>
                     <DropDown />
@@ -72,38 +79,44 @@ export function MultipleChoiceDropDown(): React.ReactNode {
 }
 
 function DropDown(): React.ReactNode {
-    const { opts, multipleChoiceAnswer } = useAppSelector(Slice.Selectors.DropDown);
+    const { opts, answerId } = useAppSelector(Slice.Selectors.DropDown);
 
     const selectOpts = [Prompt, ...opts];
 
     const startIndex = useMemo(() => {
         let idx = 0;
+
         for (let i = 0; i < selectOpts.length; ++i) {
-            if (selectOpts[i] === multipleChoiceAnswer) idx = i;
+            if ((selectOpts[i] as (typeof opts)[number]).id === answerId) {
+                idx = i;
+            }
         }
+
         return idx;
     }, []);
 
     const { listView } = useList(selectOpts.length, { unitSize: 1, startIndex });
 
+    const selectedIdx = opts.findIndex((opt) => opt.id === answerId);
+
     return (
         <List listView={listView} scrollbar={{ hide: true }}>
-            {selectOpts.map((opt) => {
-                return (
-                    <SelectOption
-                        key={opt}
-                        item={opt as Exclude<Slice.MCAnswer, undefined>}
-                    />
-                );
+            {selectOpts.map((opt, idx) => {
+                const key = typeof opt === "string" ? opt : opt.id;
+                const isSelected = !!idx && selectedIdx === idx - 1;
+
+                return <SelectOption key={key} opt={opt} isSelected={isSelected} />;
             })}
         </List>
     );
 }
 
 function SelectOption({
-    item,
+    opt,
+    isSelected,
 }: {
-    item: typeof Prompt | "A" | "B" | "C" | "D";
+    opt: string | MultipleChoiceOpt;
+    isSelected: boolean;
 }): React.ReactNode {
     const node = useNode();
     const dispatch = useAppDispatch();
@@ -120,20 +133,26 @@ function SelectOption({
 
     const { useEvent } = useKeymap({ choose: { key: "return" } });
     useEvent("choose", () => {
-        const answer = item === Prompt ? undefined : item;
+        const answer = typeof opt === "string" ? undefined : opt.id;
         dispatch(Slice.Actions.updateMultipleChoiceAnswer(answer));
         hideModal();
     });
+
+    let textContent = typeof opt === "string" ? opt : opt.value;
+
+    if (isSelected) {
+        textContent = `✔ ${textContent}`;
+    }
 
     return (
         <Box
             backgroundColor={bgColor}
             height={1}
             width="100"
-            justifyContent="center"
+            justifyContent="flex-start"
             alignItems="center"
         >
-            <Text>{item}</Text>
+            <Text wrap="truncate-end">{textContent}</Text>
         </Box>
     );
 }

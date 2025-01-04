@@ -72,7 +72,7 @@ export default function NextColumn(): React.ReactNode {
                     {nextQuestion.a && (
                         <Text
                             color={
-                                nextQuestion.multipleChoiceAnswer === "A"
+                                nextQuestion.multipleChoiceAnswer === nextQuestion.a.id
                                     ? Colors.Primary
                                     : undefined
                             }
@@ -81,7 +81,7 @@ export default function NextColumn(): React.ReactNode {
                     {nextQuestion.b && (
                         <Text
                             color={
-                                nextQuestion.multipleChoiceAnswer === "B"
+                                nextQuestion.multipleChoiceAnswer === nextQuestion.b.id
                                     ? Colors.Primary
                                     : undefined
                             }
@@ -90,7 +90,7 @@ export default function NextColumn(): React.ReactNode {
                     {nextQuestion.c && (
                         <Text
                             color={
-                                nextQuestion.multipleChoiceAnswer === "C"
+                                nextQuestion.multipleChoiceAnswer === nextQuestion.c.id
                                     ? Colors.Primary
                                     : undefined
                             }
@@ -99,7 +99,7 @@ export default function NextColumn(): React.ReactNode {
                     {nextQuestion.d && (
                         <Text
                             color={
-                                nextQuestion.multipleChoiceAnswer === "D"
+                                nextQuestion.multipleChoiceAnswer === nextQuestion.d.id
                                     ? Colors.Primary
                                     : undefined
                             }

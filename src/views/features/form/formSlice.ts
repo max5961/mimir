@@ -5,7 +5,7 @@ import { randomUUID } from "crypto";
 
 export type OptName = "a" | "b" | "c" | "d";
 export type NewQuestion = Omit<QuestionModel, "id">;
-export type MCAnswer = QuestionModel["multipleChoiceAnswer"];
+// export type MCAnswer = QuestionModel["multipleChoiceAnswer"];
 export type OptErrorPayload = { optName: OptName; hasError: boolean };
 export type InputReturnAction = "exit" | "new-line";
 
@@ -218,8 +218,13 @@ const questionSlice = createSlice({
             });
 
             // We just deleted a question, so reset the drop down
-            state.errors.emptyMcSelection = true;
-            state.question.multipleChoiceAnswer = undefined;
+            // state.errors.emptyMcSelection = true;
+            // state.question.multipleChoiceAnswer = undefined;
+
+            if (!filtered.find((opt) => opt.id === state.question.multipleChoiceAnswer)) {
+                state.errors.emptyMcSelection = true;
+                state.question.multipleChoiceAnswer = undefined;
+            }
         },
 
         // Updates the value from the selection drop down when the type is "mc"

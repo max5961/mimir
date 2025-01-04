@@ -10,7 +10,7 @@ export default function CommandLine(): React.ReactNode {
     const { currentTopic, currentIndex, nextTopic, nextQuestion } = useAppSelector(
         ExpSlice.Selectors.CommandLine,
     );
-    const { message } = useAppSelector(CliSlice.Selectors.selectMessage);
+    const message = useAppSelector(CliSlice.Selectors.selectMessage);
 
     const commands: Commands = {
         ["mkdir"]: async (args) => {

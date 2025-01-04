@@ -19,9 +19,7 @@ const cliSlice = createSlice({
         },
     },
     selectors: {
-        selectMessage: (state) => {
-            return { message: state.message };
-        },
+        selectMessage: (state) => state.message,
     },
 });
 

@@ -149,19 +149,18 @@ export const AddButton = createSelector([opts, justAdded], (opts, justAdded) => 
     return { opts, justAdded };
 });
 
-export const DropDown = createSelector(
-    [opts, multipleChoiceAnswer],
-    (opts, multipleChoiceAnswer) => {
-        const visibleOpts = Object.values(opts)
-            .filter((opt) => opt !== undefined)
-            .map((_, idx) => String.fromCharCode(65 + idx));
+export const DropDown = createSelector([opts, multipleChoiceAnswer], (opts, answerId) => {
+    const visibleOpts = Object.values(opts)
+        .filter((opt) => opt !== undefined)
+        .map((opt, idx) => {
+            return { ...opt, value: `${String.fromCharCode(idx + 65)}: ${opt.value}` };
+        });
 
-        return {
-            opts: visibleOpts,
-            multipleChoiceAnswer,
-        };
-    },
-);
+    return {
+        opts: visibleOpts,
+        answerId,
+    };
+});
 
 export const ErrorsModal = (state: RootState) => state.form.errors;
 

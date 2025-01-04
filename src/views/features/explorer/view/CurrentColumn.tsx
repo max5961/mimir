@@ -47,6 +47,7 @@ export default function CurrentColumn(): React.ReactNode {
     const { useEvent } = useKeymap({
         prevTopic: [{ input: "h" }, { key: "left" }, { key: "delete" }],
         nextTopic: [{ input: "l" }, { key: "right" }],
+        delete: { input: "dd" },
     });
 
     useEvent("prevTopic", () => {
@@ -74,6 +75,17 @@ export default function CurrentColumn(): React.ReactNode {
             );
             pendingGoToIndex.current = 0;
         }
+    });
+
+    useEvent("delete", () => {
+        if (!nextQuestion) return;
+
+        dispatch(
+            Slice.Actions.deleteQuestion({
+                topicID: currentTopic.id,
+                questionID: nextQuestion.id,
+            }),
+        );
     });
 
     let title = currentPath;

@@ -1,7 +1,8 @@
-import { createAsyncThunk } from "@reduxjs/toolkit";
+import { createAsyncThunk, isRejectedWithValue } from "@reduxjs/toolkit";
 import name from "./sliceName.js";
 import { TopicResponse } from "../../../routes/topics/topicsController.js";
 import { Path } from "../../../root.js";
+import { QuestionResponse } from "../../../routes/questions/questionsController.js";
 
 const generateTopicDataThunk = (type: string) => {
     return createAsyncThunk(
@@ -83,6 +84,32 @@ export const moveTopic = createAsyncThunk(
             }
 
             return (await response.json()) as TopicResponse.MoveTopic;
+        } catch (err) {
+            rejectWithValue(err);
+        }
+    },
+);
+
+export const deleteQuestion = createAsyncThunk(
+    `${name}/deleteQuestion`,
+    async (
+        { topicID, questionID }: { topicID: string; questionID: string },
+        { rejectWithValue },
+    ) => {
+        try {
+            const response = await fetch(
+                `${Path.Api.Questions}/${topicID}/${questionID}`,
+                {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                },
+            );
+
+            if (!response.ok) {
+                return Promise.reject(response.status);
+            }
+
+            return (await response.json()) as QuestionResponse.DeleteQuestion;
         } catch (err) {
             rejectWithValue(err);
         }

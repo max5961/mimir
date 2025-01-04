@@ -6,7 +6,6 @@ import name from "./sliceName.js";
 import * as FormThunks from "../form/thunks.js";
 import * as Thunks from "./thunks.js";
 import { QuestionResponse } from "../../../routes/questions/questionsController.js";
-import { logger } from "tuir";
 
 export type State = {
     idxTrail: number[];
@@ -141,6 +140,16 @@ const explorerSlice = createSlice({
                     if (!payload) return;
 
                     state.topicData = payload;
+                },
+            )
+            .addCase(
+                Thunks.deleteQuestion.fulfilled,
+                (
+                    state: State,
+                    action: PayloadAction<QuestionResponse.DeleteQuestion | undefined>,
+                ) => {
+                    if (!action.payload) return;
+                    state.topicData = action.payload;
                 },
             );
     },

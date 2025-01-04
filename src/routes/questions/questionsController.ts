@@ -15,6 +15,7 @@ export namespace QuestionResponse {
     export type GetQuestion = QuestionModel;
     export type PostQuestion = TopicResponse.GetTopicData;
     export type PutQuestion = TopicResponse.GetTopicData;
+    export type DeleteQuestion = TopicResponse.GetTopicData;
 }
 
 function sendErr(next: Next, questionID: string): void {
@@ -87,8 +88,38 @@ async function putQuestion(req: Req, res: Res, next: Next) {
     redirect(req, res, `/api/topics/data/${topicID}`);
 }
 
+async function deleteQuestion(req: Req, res: Res, next: Next) {
+    const topicID = req.params.topicID as string;
+    const questionID = req.params.questionID as string;
+
+    const fileData = await DataBase.openDb();
+    const topic = fileData.topics[topicID]?.topic;
+    const question = fileData.questions[questionID];
+
+    if (!topic) {
+        return next(
+            createHttpError(400, { message: `Topic with id '${topicID}' not found.` }),
+        );
+    }
+
+    if (!question) {
+        return next(
+            createHttpError(400, {
+                message: `Question with id '${questionID}' not found`,
+            }),
+        );
+    }
+
+    topic.questions = topic.questions.filter((question) => question.id !== questionID);
+
+    await DataBase.saveDb(fileData.root);
+
+    redirect(req, res, `/api/topics/data/${topicID}`);
+}
+
 export default {
     getQuestion,
     postQuestion,
     putQuestion,
+    deleteQuestion,
 };

@@ -20,6 +20,8 @@ export default function QuestionListItem({
     const iconColor = isFocus ? undefined : Colors.Alt;
     const textColor = isFocus ? undefined : Colors.Primary;
 
+    const textContent = question.question.replace(/\n/g, "");
+
     return (
         <Box width="100" backgroundColor={bgColor}>
             <Box height={1} width={2} backgroundColor="inherit" flexShrink={0}>
@@ -29,7 +31,7 @@ export default function QuestionListItem({
             </Box>
             <Box width="100" height={1} backgroundColor="inherit">
                 <Text italic dimColor={!isFocus} color={textColor} wrap="truncate-end">
-                    {question.question}
+                    {textContent}
                 </Text>
             </Box>
         </Box>

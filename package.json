@@ -8,7 +8,11 @@
         "test": "tsc && NODE_ENV=test npx vitest",
         "watch": "tsc --watch",
         "update": "npm uninstall tuir && npm link --save tuir && npm install",
-        "update:start": "npm run update && npm run start"
+        "update:start": "npm run update && npm run start",
+        "log": "touch logger.log && tail --follow logger.log",
+        "log:log": "npm run log",
+        "log:server": "touch server.log && tail --follow server.log",
+        "log:store": "touch store.log && tail --follow store.log"
     },
     "keywords": [],
     "author": "",

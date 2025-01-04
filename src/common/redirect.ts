@@ -1,12 +1,14 @@
 import fetch from "node-fetch";
 import express from "express";
-import { logger } from "tuir";
+import { serverLogger } from "../server/middleware.js";
 
 export const redirect = async (
     req: express.Request,
     res: express.Response,
     url: string,
 ) => {
+    serverLogger.color("magenta").write(`REDIRECT: ${url}`);
+
     const response = await fetch(`${req.protocol}://${req.headers.host}${url}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },

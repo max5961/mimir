@@ -115,3 +115,26 @@ export const deleteQuestion = createAsyncThunk(
         }
     },
 );
+
+export const deleteTopic = createAsyncThunk(
+    `${name}/deleteTopic`,
+    async (
+        { topicID, subTopicID }: { topicID: string; subTopicID: string },
+        { rejectWithValue },
+    ) => {
+        try {
+            const response = await fetch(`${Path.Api.Topics}/${topicID}/${subTopicID}`, {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+            });
+
+            if (!response.ok) {
+                return Promise.reject(response.status);
+            }
+
+            return (await response.json()) as TopicResponse.DeleteTopic;
+        } catch (err) {
+            rejectWithValue(err);
+        }
+    },
+);

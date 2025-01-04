@@ -5,6 +5,7 @@ import { DataBase } from "../../database/DataBase.js";
 import { TopicModel } from "../../models/TopicModel.js";
 import { RootTopic } from "../../root.js";
 import { db } from "../../database/db.js";
+import { redirect } from "../../common/redirect.js";
 
 type Req = express.Request;
 type Res = express.Response;
@@ -20,6 +21,7 @@ export namespace TopicResponse {
     export type GetTopic = TopicModel;
     export type PostTopics = GetTopicData;
     export type MoveTopic = GetTopicData;
+    export type DeleteTopic = GetTopicData;
 }
 
 function topicNotFound(id: string): { message: string } {
@@ -66,7 +68,7 @@ async function postTopics(req: Req, res: Res, next: Next): Promise<void> {
     const set = new Set<string>();
     data.currentTopic.subTopics.forEach((subTopic) => set.add(subTopic.name));
 
-    for (const newTopicName of newTopicNames) {
+    for (const newTopicName of new Set(newTopicNames).values()) {
         if (!set.has(newTopicName)) {
             data.currentTopic.subTopics.push({
                 id: randomUUID(),
@@ -80,6 +82,39 @@ async function postTopics(req: Req, res: Res, next: Next): Promise<void> {
     const { rootTopic, ...topics } = data;
     await DataBase.saveDb(rootTopic);
     res.status(200).json(topics satisfies TopicResponse.PostTopics);
+}
+
+async function deleteTopic(req: Req, res: Res, next: Next) {
+    const topicID = req.params.topicID as string;
+    const subTopicID = req.params.subTopicID as string;
+
+    // const data = await db.getTopicDataById(topicID);
+    //
+    // if (!data) {
+    //     return next(createHttpError(400, topicNotFound(topicID)));
+    // }
+    //
+    // data.currentTopic.subTopics = data.currentTopic.subTopics.filter(
+    //     (subTopic) => subTopic.id !== subTopicID,
+    // );
+    //
+    // const { rootTopic, ...topics } = data;
+    // await DataBase.saveDb(rootTopic);
+    // res.status(200).json(topics);
+
+    const data = await DataBase.openDb();
+
+    const topic = data.topics[topicID]?.topic;
+
+    if (!topic) {
+        return next(createHttpError(404, topicNotFound(topicID)));
+    }
+
+    topic.subTopics = topic.subTopics.filter((subTopic) => subTopic.id !== subTopicID);
+
+    await DataBase.saveDb(data.root);
+
+    redirect(req, res, `/api/topics/data/${topicID}`);
 }
 
 async function moveTopic(req: Req, res: Res, next: Next): Promise<void> {
@@ -173,4 +208,5 @@ export default {
     getTopic,
     postTopics,
     moveTopic,
+    deleteTopic,
 };

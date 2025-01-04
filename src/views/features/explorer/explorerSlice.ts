@@ -151,6 +151,16 @@ const explorerSlice = createSlice({
                     if (!action.payload) return;
                     state.topicData = action.payload;
                 },
+            )
+            .addCase(
+                Thunks.deleteTopic.fulfilled,
+                (
+                    state: State,
+                    action: PayloadAction<TopicResponse.DeleteTopic | undefined>,
+                ) => {
+                    if (!action.payload) return;
+                    state.topicData = action.payload;
+                },
             );
     },
 });

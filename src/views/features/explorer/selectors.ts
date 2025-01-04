@@ -45,9 +45,9 @@ export const TopBar = createSelector([currentPath], (currentPath) => {
 });
 
 export const CommandLine = createSelector(
-    [currentTopic, currentIndex],
-    (currentTopic, currentIndex) => {
-        return { currentTopic, currentIndex };
+    [currentTopic, currentIndex, nextTopic, nextQuestion],
+    (currentTopic, currentIndex, nextTopic, nextQuestion) => {
+        return { currentTopic, currentIndex, nextTopic, nextQuestion };
     },
 );
 

@@ -8,6 +8,7 @@ import { EStyles } from "./style.js";
 import TopicListItem from "./TopicListItem.js";
 import QuestionListItem from "./QuestionListItem.js";
 import * as Slice from "../explorerSlice.js";
+import * as CliSlice from "../../cli/cliSlice.js";
 
 export default function CurrentColumn(): React.ReactNode {
     const dispatch = useAppDispatch();
@@ -78,14 +79,33 @@ export default function CurrentColumn(): React.ReactNode {
     });
 
     useEvent("delete", () => {
-        if (!nextQuestion) return;
+        if (nextQuestion) {
+            return dispatch(
+                Slice.Actions.deleteQuestion({
+                    topicID: currentTopic.id,
+                    questionID: nextQuestion.id,
+                }),
+            );
+        }
 
-        dispatch(
-            Slice.Actions.deleteQuestion({
-                topicID: currentTopic.id,
-                questionID: nextQuestion.id,
-            }),
-        );
+        if (nextTopic) {
+            if (nextTopic.subTopics.length || nextTopic.questions.length) {
+                return dispatch(
+                    CliSlice.Actions.setMessage([
+                        "REJECT",
+                        `Topic '${nextTopic.name}' is not empty.  Use 'delete --force or -f' to remove`,
+                        false,
+                    ]),
+                );
+            }
+
+            return dispatch(
+                Slice.Actions.deleteTopic({
+                    topicID: currentTopic.id,
+                    subTopicID: nextTopic.id,
+                }),
+            );
+        }
     });
 
     let title = currentPath;

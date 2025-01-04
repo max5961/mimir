@@ -2,12 +2,14 @@ import { configureStore } from "@reduxjs/toolkit";
 import { useDispatch, useSelector, useStore } from "react-redux";
 import explorerSlice from "../features/explorer/explorerSlice.js";
 import formSlice from "../features/form/formSlice.js";
+import cliSlice from "../features/cli/cliSlice.js";
 import { formLogger, storeLogger } from "../middleware/storeLogger.js";
 
 const store = configureStore({
     reducer: {
         explorer: explorerSlice,
         form: formSlice,
+        cli: cliSlice,
     },
     middleware: (getDefaultMiddleware) => {
         return getDefaultMiddleware().concat(

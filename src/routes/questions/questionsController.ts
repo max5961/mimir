@@ -26,7 +26,7 @@ function sendErr(next: Next, questionID: string): void {
 
 async function getQuestion(req: Req, res: Res, next: Next) {
     const questionID = req.params.questionID as string;
-    const fileData = await DataBase.openDb();
+    const fileData = await DataBase.openTopics();
     const question = fileData.questions[questionID];
     if (!question) {
         return sendErr(next, questionID);
@@ -38,7 +38,7 @@ async function postQuestion(req: Req, res: Res, next: Next) {
     // What topic will this question be pushed to
     const topicID = req.params.topicID as string;
     const newQuestion = req.body.newQuestion as NewQuestion;
-    const fileData = await DataBase.openDb();
+    const fileData = await DataBase.openTopics();
     const topic = fileData.topics[topicID]?.topic;
 
     if (!topic) {
@@ -56,7 +56,7 @@ async function postQuestion(req: Req, res: Res, next: Next) {
         id: randomUUID(),
     } as QuestionModel);
 
-    await DataBase.saveDb(fileData.root);
+    await DataBase.saveTopics(fileData.root);
 
     redirect(req, res, `/api/topics/data/${topicID}`);
 }
@@ -66,7 +66,7 @@ async function putQuestion(req: Req, res: Res, next: Next) {
     const topicID = req.params.topicID as string;
     const questionID = req.params.questionID as string;
     const updatedQuestion = req.body.question as QuestionModel;
-    const fileData = await DataBase.openDb();
+    const fileData = await DataBase.openTopics();
     const topic = fileData.topics[topicID]?.topic;
 
     if (!topic) {
@@ -83,7 +83,7 @@ async function putQuestion(req: Req, res: Res, next: Next) {
         return question.id === questionID ? updatedQuestion : question;
     });
 
-    await DataBase.saveDb(fileData.root);
+    await DataBase.saveTopics(fileData.root);
 
     redirect(req, res, `/api/topics/data/${topicID}`);
 }
@@ -92,7 +92,7 @@ async function deleteQuestion(req: Req, res: Res, next: Next) {
     const topicID = req.params.topicID as string;
     const questionID = req.params.questionID as string;
 
-    const fileData = await DataBase.openDb();
+    const fileData = await DataBase.openTopics();
     const topic = fileData.topics[topicID]?.topic;
     const question = fileData.questions[questionID];
 
@@ -112,7 +112,7 @@ async function deleteQuestion(req: Req, res: Res, next: Next) {
 
     topic.questions = topic.questions.filter((question) => question.id !== questionID);
 
-    await DataBase.saveDb(fileData.root);
+    await DataBase.saveTopics(fileData.root);
 
     redirect(req, res, `/api/topics/data/${topicID}`);
 }

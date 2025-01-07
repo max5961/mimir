@@ -1,5 +1,3 @@
-type MultipleChoiceAnswer = "A" | "B" | "C" | "D";
-
 export type MultipleChoiceOpt = { id: string; value: string };
 
 export type MultipleChoice = {

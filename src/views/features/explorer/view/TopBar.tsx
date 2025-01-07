@@ -28,7 +28,7 @@ export default function TopBar(): React.ReactNode {
             <Box width="25" height="100">
                 <Box styles={boxStyles}>
                     <Text styles={textStyles} wrap="truncate-end">
-                        {"+ Topic"}
+                        {"+ Topic"}{" "}
                     </Text>
                 </Box>
                 <Box styles={boxStyles}>

@@ -58,8 +58,6 @@ export default function CommandLine(): React.ReactNode {
                     }
                 });
 
-            logger.write({ names });
-
             if (!names.length && nextTopic) {
                 if (nextTopic.subTopics.length || nextTopic.questions.length) {
                     if (!force) {

@@ -83,7 +83,7 @@ async function postTopics(req: Req, res: Res, next: Next): Promise<void> {
     }
 
     const { rootTopic, ...topics } = data;
-    await DataBase.saveDb(rootTopic);
+    await DataBase.saveTopics(rootTopic);
     res.status(200).json(topics satisfies TopicResponse.PostTopics);
 }
 
@@ -91,7 +91,7 @@ async function deleteTopic(req: Req, res: Res, next: Next) {
     const topicID = req.params.topicID as string;
     const subTopicID = req.params.subTopicID as string;
 
-    const data = await DataBase.openDb();
+    const data = await DataBase.openTopics();
 
     const topic = data.topics[topicID]?.topic;
 
@@ -101,7 +101,7 @@ async function deleteTopic(req: Req, res: Res, next: Next) {
 
     topic.subTopics = topic.subTopics.filter((subTopic) => subTopic.id !== subTopicID);
 
-    await DataBase.saveDb(data.root);
+    await DataBase.saveTopics(data.root);
 
     redirect(req, res, topicDataRoute(topicID));
 }
@@ -111,7 +111,7 @@ async function deleteMany(req: Req, res: Res, next: Next) {
     const names = req.body.names as string[];
     const force = req.body.force as boolean;
 
-    const data = await DataBase.openDb();
+    const data = await DataBase.openTopics();
 
     const topic = data.topics[topicID]?.topic;
 
@@ -136,7 +136,7 @@ async function deleteMany(req: Req, res: Res, next: Next) {
     });
     topic.questions = topic.questions.filter((question) => !set.has(question.question));
 
-    await DataBase.saveDb(data.root);
+    await DataBase.saveTopics(data.root);
 
     redirect(req, res, topicDataRoute(topicID));
 }
@@ -216,7 +216,7 @@ async function moveTopic(req: Req, res: Res, next: Next): Promise<void> {
         }
     }
 
-    await DataBase.saveDb(rootTopic);
+    await DataBase.saveTopics(rootTopic);
 
     const topicData = await db.getTopicDataById(cwdID);
 

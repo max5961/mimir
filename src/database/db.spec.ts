@@ -1,10 +1,52 @@
 import { test, describe, expect, beforeAll } from "vitest";
 import { DataBase, RootTopicName } from "./DataBase.js";
 import { db } from "./db.js";
+import { QuestionModel } from "../models/QuestionModel.js";
+import { SavedPlaylist } from "../models/PlaylistsModel.js";
+
+const question1: QuestionModel = {
+    id: "q1",
+    type: "qa",
+    question: "foobar-1",
+    answer: "bazqux-1",
+};
+
+const question2: QuestionModel = {
+    id: "q2",
+    type: "qa",
+    question: "foobar-2",
+    answer: "bazqux-2",
+};
+
+const question3: QuestionModel = {
+    id: "q3",
+    type: "qa",
+    question: "foobar-3",
+    answer: "bazqux-3",
+};
+
+const question4: QuestionModel = {
+    id: "q4",
+    type: "qa",
+    question: "foobar-4",
+    answer: "bazqux-4",
+};
+
+const savedPl1: SavedPlaylist = {
+    id: "savedPl1",
+    name: "FooPlaylist",
+    playlist: [
+        { path: "/", ...question1 },
+        { path: "/", ...question2 },
+        { path: "/", ...question3 },
+        { path: "/", ...question4 },
+    ],
+};
 
 beforeAll(async () => {
-    DataBase.initializeDataBase();
-    await DataBase.saveDb({
+    DataBase.initializeDataBaseSync();
+
+    await DataBase.saveTopics({
         id: "1",
         name: RootTopicName,
         questions: [],
@@ -12,10 +54,7 @@ beforeAll(async () => {
             {
                 id: "2_1",
                 name: "Foo",
-                questions: [
-                    { id: "q1", type: "qa", question: "foobar-1", answer: "bazqux-1" },
-                    { id: "q2", type: "qa", question: "foobar-2", answer: "bazqux-2" },
-                ],
+                questions: [question1, question2],
                 subTopics: [
                     {
                         id: "3_1",
@@ -34,6 +73,14 @@ beforeAll(async () => {
                 subTopics: [],
             },
         ],
+    });
+
+    await DataBase.savePlaylists({
+        active: [
+            { path: "/", ...question1 },
+            { path: "/", ...question2 },
+        ],
+        saved: [savedPl1],
     });
 });
 
@@ -169,5 +216,44 @@ describe("Invalid ids return null", () => {
     test("getQuestionDataById with Topic id", async () => {
         const data = await db.getQuestionDataById("1");
         expect(data).toBe(null);
+    });
+});
+
+describe("Playlist data", () => {
+    const newPlaylist: SavedPlaylist = {
+        id: "newPlaylist",
+        name: "New Playlist",
+        playlist: [{ id: "1", path: "/", type: "qa", question: "Foo", answer: "Bar" }],
+    };
+
+    test("Get active playlist", async () => {
+        const [q1, q2] = await db.getActivePlaylist();
+        expect(q1).toEqual({ path: "/", ...question1 });
+        expect(q2).toEqual({ path: "/", ...question2 });
+    });
+
+    test("Get playlist data by id", async () => {
+        const pl = await db.getPlaylistById(savedPl1.id);
+        expect(pl).toEqual(savedPl1);
+    });
+
+    test("Get all playlists", async () => {
+        const all = await db.getAllPlaylists();
+        expect(all).toEqual([savedPl1]);
+    });
+
+    test("Save new playlist", async () => {
+        await db.savePlaylist(newPlaylist);
+
+        const all = await db.getAllPlaylists();
+        expect(all).toEqual([savedPl1, newPlaylist]);
+    });
+
+    test("Save existing playlist", async () => {
+        const updatedPlaylist: SavedPlaylist = { ...savedPl1, name: "Updated Playlist" };
+        await db.savePlaylist(updatedPlaylist);
+
+        const all = await db.getAllPlaylists();
+        expect(all).toEqual([updatedPlaylist, newPlaylist]);
     });
 });

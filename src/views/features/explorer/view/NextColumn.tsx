@@ -6,10 +6,21 @@ import { EStyles } from "./style.js";
 import TopicListItem from "./TopicListItem.js";
 import QuestionListItem from "./QuestionListItem.js";
 import * as Slice from "../explorerSlice.js";
+import { TopicModel } from "../../../../models/TopicModel.js";
+import { QuestionModel } from "../../../../models/QuestionModel.js";
+import { QuizQuestion } from "../../../../models/DeckModel.js";
 
 export default function NextColumn(): React.ReactNode {
     const { nextTopic, nextQuestion } = useAppSelector(Slice.Selectors.NextColumn);
+    return <PreviewColumn nextTopic={nextTopic} nextQuestion={nextQuestion} />;
+}
 
+type Props = {
+    nextTopic: TopicModel | null;
+    nextQuestion: QuestionModel | QuizQuestion | null;
+};
+
+export function PreviewColumn({ nextTopic, nextQuestion }: Props): React.ReactNode {
     return (
         <Box
             styles={EStyles.ColumnBox}

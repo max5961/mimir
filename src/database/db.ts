@@ -2,8 +2,7 @@ import { DataBase } from "./DataBase.js";
 import { TopicModel } from "../models/TopicModel.js";
 import { RootTopicName } from "./DataBase.js";
 import { QuestionModel } from "../models/QuestionModel.js";
-import { ActivePlaylist, Playlists, SavedPlaylist } from "../models/PlaylistsModel.js";
-import { version } from "os";
+import { ActiveDeck, SavedDeck } from "../models/DeckModel.js";
 
 export type TopicData = {
     currentPath: string;
@@ -90,41 +89,47 @@ class Db {
         return questions;
     }
 
-    public async getActivePlaylist(): Promise<ActivePlaylist> {
-        const playlists = await DataBase.openPlaylists();
-        return playlists.active;
+    public async getActiveDeck(): Promise<ActiveDeck> {
+        const decks = await DataBase.openDecks();
+        return decks.active;
     }
 
-    public async getPlaylistById(id: string): Promise<SavedPlaylist | null> {
-        const playlists = await DataBase.openPlaylists();
-        const saved = playlists.saved;
+    public async getSavedDeckById(id: string): Promise<SavedDeck | null> {
+        const decks = await DataBase.openDecks();
+        const saved = decks.saved;
         return saved.find((playlist) => playlist.id === id) ?? null;
     }
 
-    public async getAllPlaylists(): Promise<SavedPlaylist[]> {
-        const playlists = await DataBase.openPlaylists();
-        return playlists.saved;
+    public async getAllSavedDecks(): Promise<SavedDeck[]> {
+        const decks = await DataBase.openDecks();
+        return decks.saved;
     }
 
-    public async savePlaylist(toSave: SavedPlaylist): Promise<void> {
-        const playlists = await DataBase.openPlaylists();
+    public async saveDeck(toSave: SavedDeck): Promise<void> {
+        const decks = await DataBase.openDecks();
 
         let versionExists = false;
 
-        for (let i = 0; i < playlists.saved.length; ++i) {
-            const pl = playlists.saved[i];
+        for (let i = 0; i < decks.saved.length; ++i) {
+            const pl = decks.saved[i];
             if (pl.id === toSave.id) {
                 versionExists = true;
-                playlists.saved[i] = toSave;
+                decks.saved[i] = toSave;
                 break;
             }
         }
 
         if (!versionExists) {
-            playlists.saved.push(toSave);
+            decks.saved.push(toSave);
         }
 
-        await DataBase.savePlaylists(playlists);
+        await DataBase.saveDecks(decks);
+    }
+
+    public async saveActiveDeck(nextActiveDeck): Promise<void> {
+        const decks = await DataBase.openDecks();
+        decks.active = nextActiveDeck;
+        await DataBase.saveDecks(decks);
     }
 }
 

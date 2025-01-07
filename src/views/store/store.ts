@@ -3,6 +3,7 @@ import { useDispatch, useSelector, useStore } from "react-redux";
 import explorerSlice from "../features/explorer/explorerSlice.js";
 import formSlice from "../features/form/formSlice.js";
 import cliSlice from "../features/cli/cliSlice.js";
+import decksSlice from "../features/decks/decksSlice.js";
 import { formLogger, storeLogger } from "../middleware/storeLogger.js";
 
 const store = configureStore({
@@ -10,6 +11,7 @@ const store = configureStore({
         explorer: explorerSlice,
         form: formSlice,
         cli: cliSlice,
+        decks: decksSlice,
     },
     middleware: (getDefaultMiddleware) => {
         return getDefaultMiddleware().concat(

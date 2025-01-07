@@ -1,18 +1,18 @@
 import fs from "fs/promises";
 import { existsSync, writeFileSync, mkdirSync, readFileSync } from "fs";
 import { randomUUID } from "crypto";
-import { TopicsPath, DataBaseDir, NodeEnv, PlaylistsPath } from "../env/Env.js";
+import { TopicsPath, DataBaseDir, NodeEnv, DecksPath } from "../env/Env.js";
 import { TopicModel } from "../models/TopicModel.js";
 import { IndexableFileData } from "./IndexableFileData.js";
 import { sampleRoot } from "../models/sampleTopicModel.js";
-import { Playlists } from "../models/PlaylistsModel.js";
-import { samplePlaylists } from "../models/samplePlaylistModel.js";
+import { Decks } from "../models/DeckModel.js";
+import { sampleDecks } from "../models/samplePlaylistModel.js";
 
 export const RootTopicName = "$$ROOT";
 
 export class DataBase {
     static topicsPath = TopicsPath;
-    static playlistsPath = PlaylistsPath;
+    static DecksPath = DecksPath;
 
     /*
      * Reads the json file (Topic) and converts it into a TopicIndexModel object
@@ -52,14 +52,14 @@ export class DataBase {
         return await fs.writeFile(TopicsPath, data, { encoding: "utf-8" });
     }
 
-    public static async openPlaylists(): Promise<Playlists> {
-        const data = await fs.readFile(PlaylistsPath, { encoding: "utf-8" });
-        return JSON.parse(data) as Playlists;
+    public static async openDecks(): Promise<Decks> {
+        const data = await fs.readFile(DecksPath, { encoding: "utf-8" });
+        return JSON.parse(data) as Decks;
     }
 
-    public static async savePlaylists(playlists: Playlists): Promise<void> {
+    public static async saveDecks(playlists: Decks): Promise<void> {
         const json = JSON.stringify(playlists);
-        await fs.writeFile(PlaylistsPath, json, { encoding: "utf-8" });
+        await fs.writeFile(DecksPath, json, { encoding: "utf-8" });
     }
 
     /*
@@ -75,9 +75,9 @@ export class DataBase {
     /*
      * Synchronously gets a pointer to the playlists data for first render
      * */
-    public static getPlaylistsSync(): Playlists {
-        const json = readFileSync(PlaylistsPath, { encoding: "utf-8" });
-        return JSON.parse(json) as Playlists;
+    public static getDecksSync(): Decks {
+        const json = readFileSync(DecksPath, { encoding: "utf-8" });
+        return JSON.parse(json) as Decks;
     }
 
     /*
@@ -106,7 +106,7 @@ export class DataBase {
             writeFileSync(TopicsPath, JSON.stringify(sampleRoot), {
                 encoding: "utf-8",
             });
-            writeFileSync(PlaylistsPath, JSON.stringify(samplePlaylists), {
+            writeFileSync(DecksPath, JSON.stringify(sampleDecks), {
                 encoding: "utf-8",
             });
         }

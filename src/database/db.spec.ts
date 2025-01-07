@@ -2,7 +2,7 @@ import { test, describe, expect, beforeAll } from "vitest";
 import { DataBase, RootTopicName } from "./DataBase.js";
 import { db } from "./db.js";
 import { QuestionModel } from "../models/QuestionModel.js";
-import { SavedPlaylist } from "../models/PlaylistsModel.js";
+import { SavedDeck } from "../models/DeckModel.js";
 
 const question1: QuestionModel = {
     id: "q1",
@@ -32,7 +32,7 @@ const question4: QuestionModel = {
     answer: "bazqux-4",
 };
 
-const savedPl1: SavedPlaylist = {
+const savedPl1: SavedDeck = {
     id: "savedPl1",
     name: "FooPlaylist",
     playlist: [
@@ -75,7 +75,7 @@ beforeAll(async () => {
         ],
     });
 
-    await DataBase.savePlaylists({
+    await DataBase.saveDecks({
         active: [
             { path: "/", ...question1 },
             { path: "/", ...question2 },
@@ -220,40 +220,40 @@ describe("Invalid ids return null", () => {
 });
 
 describe("Playlist data", () => {
-    const newPlaylist: SavedPlaylist = {
+    const newPlaylist: SavedDeck = {
         id: "newPlaylist",
         name: "New Playlist",
         playlist: [{ id: "1", path: "/", type: "qa", question: "Foo", answer: "Bar" }],
     };
 
     test("Get active playlist", async () => {
-        const [q1, q2] = await db.getActivePlaylist();
+        const [q1, q2] = await db.getActiveDeck();
         expect(q1).toEqual({ path: "/", ...question1 });
         expect(q2).toEqual({ path: "/", ...question2 });
     });
 
     test("Get playlist data by id", async () => {
-        const pl = await db.getPlaylistById(savedPl1.id);
+        const pl = await db.getSavedDeckById(savedPl1.id);
         expect(pl).toEqual(savedPl1);
     });
 
     test("Get all playlists", async () => {
-        const all = await db.getAllPlaylists();
+        const all = await db.getAllSavedDecks();
         expect(all).toEqual([savedPl1]);
     });
 
     test("Save new playlist", async () => {
-        await db.savePlaylist(newPlaylist);
+        await db.saveDeck(newPlaylist);
 
-        const all = await db.getAllPlaylists();
+        const all = await db.getAllSavedDecks();
         expect(all).toEqual([savedPl1, newPlaylist]);
     });
 
     test("Save existing playlist", async () => {
-        const updatedPlaylist: SavedPlaylist = { ...savedPl1, name: "Updated Playlist" };
-        await db.savePlaylist(updatedPlaylist);
+        const updatedPlaylist: SavedDeck = { ...savedPl1, name: "Updated Playlist" };
+        await db.saveDeck(updatedPlaylist);
 
-        const all = await db.getAllPlaylists();
+        const all = await db.getAllSavedDecks();
         expect(all).toEqual([updatedPlaylist, newPlaylist]);
     });
 });

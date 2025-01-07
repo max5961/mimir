@@ -1,7 +1,7 @@
-import { Playlists } from "./PlaylistsModel.js";
+import { Decks } from "./DeckModel.js";
 import { sampleRoot } from "./sampleTopicModel.js";
 
-export const samplePlaylists: Playlists = {
+export const sampleDecks: Decks = {
     active: [
         { ...sampleRoot.questions[0], path: "/" },
         { ...sampleRoot.questions[1], path: "/" },

@@ -3,14 +3,14 @@ import { topicsRoute } from "../routes/topics/topicsRoute.js";
 import createHttpError from "http-errors";
 import { log, serverLogger } from "./middleware.js";
 import { questionsRoute } from "../routes/questions/questionsRoute.js";
-import { playlistsRoute } from "../routes/playlists/playlistsRoute.js";
+import { decksRoute } from "../routes/decks/decksRoute.js";
 
 export const getPath = (baseURL: string) => {
     return {
         Api: {
             Topics: `${baseURL}/api/topics`,
             Questions: `${baseURL}/api/questions`,
-            Playlists: `${baseURL}/api/playlists`,
+            Decks: `${baseURL}/api/playlists`,
         },
     };
 };
@@ -24,7 +24,7 @@ app.use(log);
 
 app.use(Path.Api.Topics, topicsRoute);
 app.use(Path.Api.Questions, questionsRoute);
-app.use(Path.Api.Playlists, playlistsRoute);
+app.use(Path.Api.Decks, decksRoute);
 
 app.use((_req, _res, next) => {
     next(createHttpError(404, "Not found"));

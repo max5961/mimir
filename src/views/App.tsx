@@ -6,8 +6,7 @@ import Explorer from "./features/explorer/view/Explorer.js";
 import Form from "./features/form/view/Form.js";
 import * as ExpSlice from "./features/explorer/explorerSlice.js";
 import ActiveDeck from "./features/decks/view/ActiveDeck.js";
-
-const fullscreen = true;
+import Quiz from "./features/decks/view/Quiz.js";
 
 export default function App(): React.ReactNode {
     const dispatch = useAppDispatch();
@@ -16,7 +15,7 @@ export default function App(): React.ReactNode {
         dispatch(ExpSlice.Actions.getTopicData({ topicID: RootTopic.id }));
     }, []);
 
-    const { pageView, control } = usePages(2);
+    const { pageView, control } = usePages(3);
 
     const { useEvent } = useKeymap({
         goToPage: [
@@ -38,21 +37,16 @@ export default function App(): React.ReactNode {
         control.goToPage(num - 1);
     });
 
-    const content = (
-        <Box height="100" width="100">
-            <Pages pageView={pageView}>
-                <Explorer />
-                <ActiveDeck />
-            </Pages>
-            <Form />
-        </Box>
-    );
-
-    return fullscreen ? (
-        <Viewport flexDirection="column">{content}</Viewport>
-    ) : (
-        <Box height={20} width="100">
-            {content}
-        </Box>
+    return (
+        <Viewport flexDirection="column">
+            <Box height="100" width="100">
+                <Pages pageView={pageView}>
+                    <Explorer />
+                    <ActiveDeck />
+                    <Quiz />
+                </Pages>
+                <Form />
+            </Box>
+        </Viewport>
     );
 }

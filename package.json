@@ -1,5 +1,5 @@
 {
-    "name": "quild",
+    "name": "novi",
     "version": "1.0.0",
     "description": "",
     "main": "dist/root.js",
@@ -7,10 +7,10 @@
         "start": "tsc && NODE_ENV=development node ./dist/root.js",
         "test": "tsc && NODE_ENV=test npx vitest",
         "watch": "tsc --watch",
-        "update": "npm uninstall tuir && npm link --save tuir && npm install",
-        "update:start": "npm run update && npm run start",
-        "log": "touch logger.log && tail --follow logger.log",
-        "log:log": "npm run log",
+        "update": "npx directlink --update",
+        "start:update": "npm run update && npm run start",
+        "log": "touch console.log && tail --follow console.log",
+        "log:console": "npm run log",
         "log:server": "touch server.log && tail --follow server.log",
         "log:store": "touch store.log && tail --follow store.log"
     },
@@ -19,7 +19,7 @@
     "license": "ISC",
     "dependencies": {
         "@reduxjs/toolkit": "^2.5.0",
-        "@types/react": "^19.0.2",
+        "@types/react": "^18.2.43",
         "dotenv": "^16.4.7",
         "express": "^4.21.2",
         "express-async-handler": "^1.2.0",
@@ -32,11 +32,15 @@
     "devDependencies": {
         "@babel/preset-env": "^7.26.0",
         "@babel/preset-typescript": "^7.26.0",
+        "@mmorrissey5961/directlink": "^1.0.0",
         "@types/express": "^5.0.0",
         "@types/node": "^22.10.2",
         "prettier": "^3.4.2",
         "typescript": "^5.6.0",
         "vitest": "^2.1.8"
     },
-    "type": "module"
+    "type": "module",
+    "directlinks": {
+        "/home/max/repos/tuir": []
+    }
 }

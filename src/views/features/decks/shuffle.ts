@@ -1,8 +1,20 @@
+import assert from "assert";
+
 export function shuffle<T extends { id: string } = { id: string }>(
     deck: T[],
     cycles = 25,
+    originalDeck: T[] | null = null,
 ) {
-    if (!cycles) return deck;
+    originalDeck = originalDeck ?? deck;
+
+    if (!cycles) {
+        try {
+            assert.notDeepEqual(originalDeck, deck);
+            return deck;
+        } catch {
+            return shuffle(deck, 25, originalDeck);
+        }
+    }
 
     const arr = deck.slice();
 
@@ -34,5 +46,5 @@ export function shuffle<T extends { id: string } = { id: string }>(
         arr[rIdx] = end;
     }
 
-    return shuffle(arr, --cycles);
+    return shuffle(arr, --cycles, originalDeck);
 }

@@ -1,6 +1,6 @@
 import "./env/Env.js";
 import React from "react";
-import { preserveScreen, render, setMouseReporting } from "tuir";
+import { preserveScreen, render, setMouseReporting, setConsole } from "tuir";
 import App from "./views/App.js";
 import { app, getPath } from "./server/server.js";
 import { DataBase } from "./database/DataBase.js";
@@ -18,6 +18,8 @@ export const RootTopic = DataBase.getRootTopicSync();
 
 preserveScreen();
 setMouseReporting(true);
+setConsole(true);
+
 render(
     <Provider store={store}>
         <App />

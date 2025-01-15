@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Cli, Commands, logger } from "tuir";
+import { Box, Cli, CliConfig, logger } from "tuir";
 import { useAppDispatch, useAppSelector } from "../store/store.js";
 import { TopicModel } from "../../models/TopicModel.js";
 import * as ExpSlice from "../features/explorer/explorerSlice.js";
@@ -12,110 +12,123 @@ export default function CommandLine(): React.ReactNode {
     );
     const message = useAppSelector(CliSlice.Selectors.selectMessage);
 
-    const commands: Commands = {
-        ["mkdir"]: async (args) => {
-            if (args.length) {
+    const config: CliConfig = {
+        commands: {
+            ["mkdir"]: async (args) => {
+                if (args.length) {
+                    dispatch(
+                        ExpSlice.Actions.postTopic({
+                            newTopicNames: args,
+                            topicID: currentTopic.id,
+                        }),
+                    );
+                }
+            },
+            ["mv"]: async (args) => {
+                if (!args[0] || !args[1]) return Promise.reject("mv: missing arguments");
+
+                let target: TopicModel | undefined = currentTopic.subTopics[currentIndex];
+                if (!isVariable(args[0])) {
+                    target = currentTopic.subTopics.find(
+                        (subTopic) => subTopic.name === args[0],
+                    );
+
+                    if (!target) {
+                        return Promise.reject("mv: invalid target");
+                    }
+                }
+
                 dispatch(
-                    ExpSlice.Actions.postTopic({
-                        newTopicNames: args,
-                        topicID: currentTopic.id,
+                    ExpSlice.Actions.moveTopic({
+                        cwdID: currentTopic.id,
+                        subTopicID: target.id,
+                        destination: args[1],
                     }),
                 );
-            }
-        },
-        ["mv"]: async (args) => {
-            if (!args[0] || !args[1]) return Promise.reject("mv: missing arguments");
+            },
+            ["delete"]: async (args) => {
+                const force = args.includes("--force") || args.includes("-f");
 
-            let target: TopicModel | undefined = currentTopic.subTopics[currentIndex];
-            if (!isVariable(args[0])) {
-                target = currentTopic.subTopics.find(
-                    (subTopic) => subTopic.name === args[0],
-                );
+                const names = args
+                    .filter((arg) => arg !== "--force" && arg !== "-f")
+                    .map((arg) => {
+                        if (isVariable(arg)) {
+                            return nextTopic?.name || nextQuestion?.question || "";
+                        } else {
+                            return arg;
+                        }
+                    });
 
-                if (!target) {
-                    return Promise.reject("mv: invalid target");
-                }
-            }
-
-            dispatch(
-                ExpSlice.Actions.moveTopic({
-                    cwdID: currentTopic.id,
-                    subTopicID: target.id,
-                    destination: args[1],
-                }),
-            );
-        },
-        ["delete"]: async (args) => {
-            const force = args.includes("--force") || args.includes("-f");
-
-            const names = args
-                .filter((arg) => arg !== "--force" && arg !== "-f")
-                .map((arg) => {
-                    if (isVariable(arg)) {
-                        return nextTopic?.name || nextQuestion?.question || "";
-                    } else {
-                        return arg;
+                if (!names.length && nextTopic) {
+                    if (nextTopic.subTopics.length || nextTopic.questions.length) {
+                        if (!force) {
+                            return Promise.reject(
+                                "Topic is not empty.  Use the --force flag",
+                            );
+                        }
                     }
+
+                    return dispatch(
+                        ExpSlice.Actions.deleteTopic({
+                            topicID: currentTopic.id,
+                            subTopicID: nextTopic.id,
+                        }),
+                    );
+                }
+
+                if (!names.length && nextQuestion) {
+                    return dispatch(
+                        ExpSlice.Actions.deleteQuestion({
+                            topicID: currentTopic.id,
+                            questionID: nextQuestion.id,
+                        }),
+                    );
+                }
+
+                const set = new Set(names);
+                const hasNonEmpty = currentTopic.subTopics.some((subTopic) => {
+                    return (
+                        set.has(subTopic.name) &&
+                        subTopic.questions.length &&
+                        subTopic.subTopics.length
+                    );
                 });
 
-            if (!names.length && nextTopic) {
-                if (nextTopic.subTopics.length || nextTopic.questions.length) {
-                    if (!force) {
-                        return Promise.reject(
-                            "Topic is not empty.  Use the --force flag",
-                        );
-                    }
+                dispatch(
+                    ExpSlice.Actions.deleteMany({
+                        topicID: currentTopic.id,
+                        names,
+                        force,
+                    }),
+                );
+
+                if (hasNonEmpty && !force) {
+                    return Promise.reject(
+                        "Some topics are not empty.  Use the --force or -f flag to remove them",
+                    );
                 }
-
-                return dispatch(
-                    ExpSlice.Actions.deleteTopic({
-                        topicID: currentTopic.id,
-                        subTopicID: nextTopic.id,
-                    }),
-                );
-            }
-
-            if (!names.length && nextQuestion) {
-                return dispatch(
-                    ExpSlice.Actions.deleteQuestion({
-                        topicID: currentTopic.id,
-                        questionID: nextQuestion.id,
-                    }),
-                );
-            }
-
-            const set = new Set(names);
-            const hasNonEmpty = currentTopic.subTopics.some((subTopic) => {
-                return (
-                    set.has(subTopic.name) &&
-                    subTopic.questions.length &&
-                    subTopic.subTopics.length
-                );
-            });
-
-            dispatch(
-                ExpSlice.Actions.deleteMany({
-                    topicID: currentTopic.id,
-                    names,
-                    force,
-                }),
-            );
-
-            if (hasNonEmpty && !force) {
-                return Promise.reject(
-                    "Some topics are not empty.  Use the --force or -f flag to remove them",
-                );
-            }
+            },
+            DEFAULT: (args) => {
+                return Promise.reject("Unknown command: " + args[0]);
+            },
         },
-        DEFAULT: (args) => {
-            return Promise.reject("Unknown command: " + args[0]);
+        prompts(setValue) {
+            return [
+                {
+                    keyinput: [{ input: "t" }, { input: "u" }, { input: "v" }],
+                    prompt: "Add a topic: ",
+                    handler(_, rawinput) {
+                        setValue("RESOLVE", `You have entered: ${rawinput}`);
+                    },
+                },
+            ];
         },
     };
 
     return (
         <Box height={1} width="100">
             <Cli
-                commands={commands}
+                config={config}
                 message={message}
                 prompt=":"
                 rejectStyles={{

@@ -6,6 +6,7 @@ import ParentColumn from "./ParentColumn.js";
 import CurrentColumn from "./CurrentColumn.js";
 import NextColumn from "./NextColumn.js";
 import TopBar from "./TopBar.js";
+import Form from "../../form/view/Form.js";
 
 export default function Explorer(): React.ReactNode {
     return (
@@ -19,6 +20,7 @@ export default function Explorer(): React.ReactNode {
             <Box height={1} width="100">
                 <CommandLine />
             </Box>
+            <Form />
         </Box>
     );
 }

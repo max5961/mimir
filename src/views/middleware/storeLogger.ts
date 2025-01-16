@@ -7,9 +7,11 @@ export const storeLogger =
     ({
         active,
         slice = "all",
+        logState = true,
     }: {
         active: boolean;
-        slice: "all" | "explorer" | "form" | "deck" | "cli";
+        slice: "all" | "explorer" | "form" | "deck" | "cli" | "quiz";
+        logState: boolean;
     }) =>
     (store: any) =>
     (next: any) =>
@@ -31,6 +33,6 @@ export const storeLogger =
             nextState = store.getState().cli;
         }
 
-        active && logger.write("NEXT STATE", nextState);
+        active && logState && logger.write("NEXT STATE", nextState);
         return result;
     };

@@ -1,10 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { useDispatch, useSelector, useStore } from "react-redux";
+import { storeLogger } from "../middleware/storeLogger.js";
 import explorerSlice from "../features/explorer/explorerSlice.js";
 import formSlice from "../features/form/formSlice.js";
 import cliSlice from "../features/cli/cliSlice.js";
 import decksSlice from "../features/decks/decksSlice.js";
-import { storeLogger } from "../middleware/storeLogger.js";
+import quizSlice from "../features/quiz/quizSlice.js";
 
 const store = configureStore({
     reducer: {
@@ -12,10 +13,11 @@ const store = configureStore({
         form: formSlice,
         cli: cliSlice,
         decks: decksSlice,
+        quiz: quizSlice,
     },
     middleware: (getDefaultMiddleware) => {
         return getDefaultMiddleware().concat(
-            storeLogger({ active: true, slice: "deck" }),
+            storeLogger({ active: true, slice: "quiz", logState: false }),
         );
     },
 });

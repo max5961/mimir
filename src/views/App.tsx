@@ -6,7 +6,7 @@ import Explorer from "./features/explorer/view/Explorer.js";
 import Form from "./features/form/view/Form.js";
 import * as ExpSlice from "./features/explorer/explorerSlice.js";
 import ActiveDeck from "./features/decks/view/ActiveDeck.js";
-import Quiz from "./features/decks/view/Quiz.js";
+import Quiz from "./features/quiz/view/Quiz.js";
 
 export default function App(): React.ReactNode {
     const dispatch = useAppDispatch();
@@ -41,11 +41,10 @@ export default function App(): React.ReactNode {
         <Viewport flexDirection="column">
             <Box height="100" width="100">
                 <Pages pageView={pageView}>
-                    <Explorer />
                     <ActiveDeck />
+                    <Explorer />
                     <Quiz />
                 </Pages>
-                <Form />
             </Box>
         </Viewport>
     );

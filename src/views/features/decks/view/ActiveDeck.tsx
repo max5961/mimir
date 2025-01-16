@@ -120,7 +120,7 @@ function ActiveListItem({ question }: { question: QuizQuestion }): React.ReactNo
         <Box height={1} flexShrink={0} width="100">
             <Box height="100" width="100" backgroundColor={bgColor(questionColor)}>
                 <Text wrap="truncate-end" color={textColor(questionColor)}>
-                    {question.question}
+                    {question.question.replace(/\n/g, "")}
                 </Text>
             </Box>
             <Box

@@ -1,4 +1,4 @@
-import { createAsyncThunk, isRejectedWithValue } from "@reduxjs/toolkit";
+import { createAsyncThunk } from "@reduxjs/toolkit";
 import name from "./sliceName.js";
 import { TopicResponse } from "../../../routes/topics/topicsController.js";
 import { Path } from "../../../root.js";
@@ -11,22 +11,18 @@ const generateTopicDataThunk = (type: string) => {
             { topicID, idxTrail }: { topicID: string; idxTrail?: number[] },
             { rejectWithValue },
         ) => {
-            try {
-                const response = await fetch(`${Path.Api.Topics}/data/${topicID}`, {
-                    method: "GET",
-                    headers: { "Content-Type": "application/json" },
-                });
+            const response = await fetch(`${Path.Api.Topics}/data/${topicID}`, {
+                method: "GET",
+                headers: { "Content-Type": "application/json" },
+            });
 
-                if (!response.ok) {
-                    return Promise.reject(response.status);
-                }
-
-                const data = (await response.json()) as TopicResponse.GetTopicData;
-
-                return { ...data, idxTrail };
-            } catch (err) {
-                rejectWithValue(err);
+            if (!response.ok) {
+                return rejectWithValue(response.status);
             }
+
+            const data = (await response.json()) as TopicResponse.GetTopicData;
+
+            return { ...data, idxTrail };
         },
     );
 };
@@ -41,21 +37,17 @@ export const postTopic = createAsyncThunk(
         { newTopicNames, topicID }: { newTopicNames: string[]; topicID: string },
         { rejectWithValue },
     ) => {
-        try {
-            const response = await fetch(`${Path.Api.Topics}/${topicID}/subtopics`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ newTopicNames }),
-            });
+        const response = await fetch(`${Path.Api.Topics}/${topicID}/subtopics`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ newTopicNames }),
+        });
 
-            if (!response.ok) {
-                return Promise.reject(response.status);
-            }
-
-            return (await response.json()) as TopicResponse.PostTopics;
-        } catch (err) {
-            rejectWithValue(err);
+        if (!response.ok) {
+            return rejectWithValue(response.status);
         }
+
+        return (await response.json()) as TopicResponse.PostTopics;
     },
 );
 
@@ -69,24 +61,17 @@ export const moveTopic = createAsyncThunk(
         }: { cwdID: string; subTopicID: string; destination: string },
         { rejectWithValue },
     ) => {
-        try {
-            const response = await fetch(
-                `${Path.Api.Topics}/move/${cwdID}/${subTopicID}`,
-                {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ destination }),
-                },
-            );
+        const response = await fetch(`${Path.Api.Topics}/move/${cwdID}/${subTopicID}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ destination }),
+        });
 
-            if (!response.ok) {
-                return Promise.reject(response.status);
-            }
-
-            return (await response.json()) as TopicResponse.MoveTopic;
-        } catch (err) {
-            rejectWithValue(err);
+        if (!response.ok) {
+            return rejectWithValue(response.status);
         }
+
+        return (await response.json()) as TopicResponse.MoveTopic;
     },
 );
 
@@ -96,23 +81,16 @@ export const deleteQuestion = createAsyncThunk(
         { topicID, questionID }: { topicID: string; questionID: string },
         { rejectWithValue },
     ) => {
-        try {
-            const response = await fetch(
-                `${Path.Api.Questions}/${topicID}/${questionID}`,
-                {
-                    method: "DELETE",
-                    headers: { "Content-Type": "application/json" },
-                },
-            );
+        const response = await fetch(`${Path.Api.Questions}/${topicID}/${questionID}`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+        });
 
-            if (!response.ok) {
-                return Promise.reject(response.status);
-            }
-
-            return (await response.json()) as QuestionResponse.DeleteQuestion;
-        } catch (err) {
-            rejectWithValue(err);
+        if (!response.ok) {
+            return rejectWithValue(response.status);
         }
+
+        return (await response.json()) as QuestionResponse.DeleteQuestion;
     },
 );
 
@@ -122,23 +100,19 @@ export const deleteTopic = createAsyncThunk(
         { topicID, subTopicID }: { topicID: string; subTopicID: string },
         { rejectWithValue },
     ) => {
-        try {
-            const response = await fetch(
-                `${Path.Api.Topics}/subTopic/${topicID}/${subTopicID}`,
-                {
-                    method: "DELETE",
-                    headers: { "Content-Type": "application/json" },
-                },
-            );
+        const response = await fetch(
+            `${Path.Api.Topics}/subTopic/${topicID}/${subTopicID}`,
+            {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+            },
+        );
 
-            if (!response.ok) {
-                return Promise.reject(response.status);
-            }
-
-            return (await response.json()) as TopicResponse.DeleteTopic;
-        } catch (err) {
-            rejectWithValue(err);
+        if (!response.ok) {
+            return rejectWithValue(response.status);
         }
+
+        return (await response.json()) as TopicResponse.DeleteTopic;
     },
 );
 
@@ -148,20 +122,16 @@ export const deleteMany = createAsyncThunk(
         { topicID, names, force }: { topicID: string; names: string[]; force: boolean },
         { rejectWithValue },
     ) => {
-        try {
-            const response = await fetch(`${Path.Api.Topics}/many/${topicID}`, {
-                method: "DELETE",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ names, force }),
-            });
+        const response = await fetch(`${Path.Api.Topics}/many/${topicID}`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ names, force }),
+        });
 
-            if (!response.ok) {
-                return Promise.reject(response.status);
-            }
-
-            return (await response.json()) as TopicResponse.DeleteMany;
-        } catch (err) {
-            rejectWithValue(err);
+        if (!response.ok) {
+            return rejectWithValue(response.status);
         }
+
+        return (await response.json()) as TopicResponse.DeleteMany;
     },
 );

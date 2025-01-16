@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { useList, useKeymap, Text, Box, List } from "tuir";
+import { useList, useKeymap, Text, Box, List, logger } from "tuir";
 import { TopicModel } from "../../../../models/TopicModel.js";
 import { QuestionModel } from "../../../../models/QuestionModel.js";
 import { Colors } from "../../../globals.js";
@@ -9,6 +9,7 @@ import TopicListItem from "./TopicListItem.js";
 import QuestionListItem from "./QuestionListItem.js";
 import * as Slice from "../explorerSlice.js";
 import * as CliSlice from "../../cli/cliSlice.js";
+import * as DeckSlice from "../../decks/decksSlice.js";
 
 export default function CurrentColumn(): React.ReactNode {
     const dispatch = useAppDispatch();
@@ -49,6 +50,7 @@ export default function CurrentColumn(): React.ReactNode {
         prevTopic: [{ input: "h" }, { key: "left" }, { key: "delete" }],
         nextTopic: [{ input: "l" }, { key: "right" }],
         delete: { input: "dd" },
+        addToActiveDeck: { key: "return" },
     });
 
     useEvent("prevTopic", () => {
@@ -105,6 +107,22 @@ export default function CurrentColumn(): React.ReactNode {
                     subTopicID: nextTopic.id,
                 }),
             );
+        }
+    });
+
+    useEvent("addToActiveDeck", () => {
+        if (nextQuestion) {
+            return dispatch(
+                DeckSlice.Actions.pushQuestionToActiveDeck({
+                    ...nextQuestion,
+                    path: currentPath,
+                }),
+            );
+        }
+
+        if (nextTopic) {
+            const id = nextTopic.id;
+            return dispatch(DeckSlice.Actions.pushTopicToActiveDeck(id));
         }
     });
 

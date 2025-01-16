@@ -6,7 +6,9 @@ export type ActiveDeck = QuizQuestion[];
 
 export type SavedDeck = { id: string; name: string; playlist: QuizQuestion[] };
 
+export type SavedDeckStore = { [id: string]: SavedDeck };
+
 export type Decks = {
     active: QuizQuestion[];
-    saved: SavedDeck[];
+    saved: SavedDeckStore;
 };

@@ -12,7 +12,7 @@ import {
 } from "tuir";
 import { Colors } from "../../../globals.js";
 import SavedPlaylists from "./SavedDecks.js";
-import PlaylistsCommandLine from "./DecksCommandLine.js";
+import DecksCommandLine from "./DecksCommandLine.js";
 import { useAppDispatch, useAppSelector } from "../../../store/store.js";
 import * as Slice from "../decksSlice.js";
 import { QuizQuestion } from "../../../../models/DeckModel.js";
@@ -52,9 +52,9 @@ export default function ActiveDeck(): React.ReactNode {
                 <Box height="100" width="100" flexShrink={1.6}>
                     <Preview />
                 </Box>
-                <PlaylistsCommandLine />
                 <SavedPlaylists />
             </Box>
+            <DecksCommandLine />
         </Box>
     );
 }
@@ -67,11 +67,19 @@ function ActiveList(): React.ReactNode {
     const dispatch = useAppDispatch();
     const deck = useAppSelector(Slice.Selectors.activeDeck);
 
-    const { listView } = useList(deck.length);
+    const { listView, control } = useList(deck.length);
 
-    const { useEvent } = useKeymap({ shuffle: { input: "s" } });
+    const { useEvent } = useKeymap({ shuffle: { input: "s" }, delete: { input: "dd" } });
+
     useEvent("shuffle", () => {
         dispatch(Slice.Actions.shuffleActiveDeck(deck));
+    });
+
+    useEvent("delete", () => {
+        if (!deck.length) return;
+
+        const id = deck[control.currentIndex]!.id;
+        dispatch(Slice.Actions.deleteQuestionFromActiveDeck(id));
     });
 
     return (

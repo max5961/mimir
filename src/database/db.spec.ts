@@ -32,8 +32,8 @@ const question4: QuestionModel = {
     answer: "bazqux-4",
 };
 
-const savedPl1: SavedDeck = {
-    id: "savedPl1",
+const savedPl1 = {
+    id: "saved_pl1_id",
     name: "FooPlaylist",
     playlist: [
         { path: "/", ...question1 },
@@ -80,7 +80,9 @@ beforeAll(async () => {
             { path: "/", ...question1 },
             { path: "/", ...question2 },
         ],
-        saved: [savedPl1],
+        saved: {
+            [savedPl1.id]: savedPl1,
+        },
     });
 });
 
@@ -221,7 +223,7 @@ describe("Invalid ids return null", () => {
 
 describe("Playlist data", () => {
     const newPlaylist: SavedDeck = {
-        id: "newPlaylist",
+        id: "new pl",
         name: "New Playlist",
         playlist: [{ id: "1", path: "/", type: "qa", question: "Foo", answer: "Bar" }],
     };
@@ -239,21 +241,30 @@ describe("Playlist data", () => {
 
     test("Get all playlists", async () => {
         const all = await db.getAllSavedDecks();
-        expect(all).toEqual([savedPl1]);
+
+        expect(all).toEqual({
+            [savedPl1.id]: { ...savedPl1 },
+        });
     });
 
     test("Save new playlist", async () => {
         await db.saveDeck(newPlaylist);
-
         const all = await db.getAllSavedDecks();
-        expect(all).toEqual([savedPl1, newPlaylist]);
+
+        expect(all).toEqual({
+            [savedPl1.id]: { ...savedPl1 },
+            [newPlaylist.id]: { ...newPlaylist },
+        });
     });
 
     test("Save existing playlist", async () => {
         const updatedPlaylist: SavedDeck = { ...savedPl1, name: "Updated Playlist" };
-        await db.saveDeck(updatedPlaylist);
+        await db.updateDeck(updatedPlaylist);
 
         const all = await db.getAllSavedDecks();
-        expect(all).toEqual([updatedPlaylist, newPlaylist]);
+        expect(all).toEqual({
+            [newPlaylist.id]: { ...newPlaylist },
+            [savedPl1.id]: { ...savedPl1 },
+        });
     });
 });

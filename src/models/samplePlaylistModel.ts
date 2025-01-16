@@ -12,8 +12,8 @@ export const sampleDecks: Decks = {
         { ...sampleRoot.questions[6], path: "/" },
         { ...sampleRoot.questions[7], path: "/" },
     ],
-    saved: [
-        {
+    saved: {
+        ["pl1"]: {
             id: "pl1",
             name: "General Knowledge",
             playlist: [
@@ -23,5 +23,5 @@ export const sampleDecks: Decks = {
                 { ...sampleRoot.subTopics[1].questions[1], path: "/History" },
             ],
         },
-    ],
+    },
 };

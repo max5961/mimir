@@ -4,7 +4,7 @@ import explorerSlice from "../features/explorer/explorerSlice.js";
 import formSlice from "../features/form/formSlice.js";
 import cliSlice from "../features/cli/cliSlice.js";
 import decksSlice from "../features/decks/decksSlice.js";
-import { formLogger, storeLogger } from "../middleware/storeLogger.js";
+import { storeLogger } from "../middleware/storeLogger.js";
 
 const store = configureStore({
     reducer: {
@@ -15,9 +15,7 @@ const store = configureStore({
     },
     middleware: (getDefaultMiddleware) => {
         return getDefaultMiddleware().concat(
-            // storeLogger({ active: NodeEnv === "development" }),
-            // storeLogger({ active: true }),
-            formLogger({ active: true, dispatch: true, nextState: true }),
+            storeLogger({ active: true, slice: "deck" }),
         );
     },
 });

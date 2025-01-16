@@ -83,17 +83,17 @@ export const sampleRoot: TopicModel = {
     ],
     subTopics: [
         {
-            id: "1",
+            id: "sci1",
             name: "Science",
             questions: [
                 {
-                    id: "sci1",
+                    id: "sci-q-1",
                     type: "qa",
                     question: "What is the chemical symbol for potassium?",
                     answer: "K",
                 },
                 {
-                    id: "sci2",
+                    id: "sci-q-2",
                     type: "mc",
                     question: "Which gas do plants need for photosynthesis?",
                     multipleChoiceAnswer: "3",
@@ -105,17 +105,17 @@ export const sampleRoot: TopicModel = {
             ],
             subTopics: [
                 {
-                    id: "1_1",
+                    id: "phy1",
                     name: "Physics",
                     questions: [
                         {
-                            id: "phy1",
+                            id: "phy-q-1",
                             type: "qa",
                             question: "Who formulated the laws of motion?",
                             answer: "Isaac Newton",
                         },
                         {
-                            id: "phy2",
+                            id: "phy-q-2",
                             type: "mc",
                             question: "What is the unit of electrical resistance?",
                             multipleChoiceAnswer: "2",
@@ -128,17 +128,17 @@ export const sampleRoot: TopicModel = {
                     subTopics: [],
                 },
                 {
-                    id: "1_2",
+                    id: "bio1",
                     name: "Biology",
                     questions: [
                         {
-                            id: "bio1",
+                            id: "bio-q-1",
                             type: "qa",
                             question: "What is the powerhouse of the cell?",
                             answer: "Mitochondria",
                         },
                         {
-                            id: "bio2",
+                            id: "bio-q-2",
                             type: "mc",
                             question: "Which part of the plant conducts photosynthesis?",
                             multipleChoiceAnswer: "4",
@@ -153,17 +153,17 @@ export const sampleRoot: TopicModel = {
             ],
         },
         {
-            id: "2",
+            id: "hist1",
             name: "History",
             questions: [
                 {
-                    id: "hist1",
+                    id: "hist-q-1",
                     type: "qa",
                     question: "Who was the first emperor of Rome?",
                     answer: "Augustus",
                 },
                 {
-                    id: "hist2",
+                    id: "hist-q-2",
                     type: "mc",
                     question: "Which year did World War I start?",
                     multipleChoiceAnswer: "1",
@@ -175,17 +175,17 @@ export const sampleRoot: TopicModel = {
             ],
             subTopics: [
                 {
-                    id: "2_1",
+                    id: "anc1",
                     name: "Ancient Civilizations",
                     questions: [
                         {
-                            id: "anc1",
+                            id: "anc-q-1",
                             type: "qa",
                             question: "Which civilization built Machu Picchu?",
                             answer: "Inca",
                         },
                         {
-                            id: "anc2",
+                            id: "anc-q-2",
                             type: "mc",
                             question: "Where did the first Olympic Games take place?",
                             multipleChoiceAnswer: "2",
@@ -200,17 +200,17 @@ export const sampleRoot: TopicModel = {
             ],
         },
         {
-            id: "3",
+            id: "math1",
             name: "Mathematics",
             questions: [
                 {
-                    id: "math1",
+                    id: "math-q-1",
                     type: "qa",
                     question: "What is the value of π (pi) to two decimal places?",
                     answer: "3.14",
                 },
                 {
-                    id: "math2",
+                    id: "math-q-2",
                     type: "mc",
                     question: "What is 12 squared?",
                     multipleChoiceAnswer: "3",
@@ -222,17 +222,17 @@ export const sampleRoot: TopicModel = {
             ],
             subTopics: [
                 {
-                    id: "3_1",
+                    id: "geom",
                     name: "Geometry",
                     questions: [
                         {
-                            id: "geo1",
+                            id: "geom-q-1",
                             type: "qa",
                             question: "How many sides does a heptagon have?",
                             answer: "7",
                         },
                         {
-                            id: "geo2",
+                            id: "geom-q-2",
                             type: "mc",
                             question: "What is the formula for the area of a circle?",
                             answer: "1",

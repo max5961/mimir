@@ -2,7 +2,9 @@ import { DataBase } from "./DataBase.js";
 import { TopicModel } from "../models/TopicModel.js";
 import { RootTopicName } from "./DataBase.js";
 import { QuestionModel } from "../models/QuestionModel.js";
-import { ActiveDeck, SavedDeck } from "../models/DeckModel.js";
+import { ActiveDeck, SavedDeck, SavedDeckStore } from "../models/DeckModel.js";
+import { randomUUID } from "crypto";
+import { logger } from "tuir";
 
 export type TopicData = {
     currentPath: string;
@@ -89,6 +91,8 @@ class Db {
         return questions;
     }
 
+    // Decks
+
     public async getActiveDeck(): Promise<ActiveDeck> {
         const decks = await DataBase.openDecks();
         return decks.active;
@@ -97,36 +101,47 @@ class Db {
     public async getSavedDeckById(id: string): Promise<SavedDeck | null> {
         const decks = await DataBase.openDecks();
         const saved = decks.saved;
-        return saved.find((playlist) => playlist.id === id) ?? null;
+        return saved[id] ?? null;
     }
 
-    public async getAllSavedDecks(): Promise<SavedDeck[]> {
+    public async getSavedDeckByName(name: string): Promise<SavedDeck | null> {
+        const decks = await DataBase.openDecks();
+        return Object.values(decks.saved).find((deck) => deck.name === name) ?? null;
+    }
+
+    public async getAllSavedDecks(): Promise<SavedDeckStore> {
         const decks = await DataBase.openDecks();
         return decks.saved;
     }
 
-    public async saveDeck(toSave: SavedDeck): Promise<void> {
+    public async deckNameExists(deck: SavedDeck): Promise<boolean> {
         const decks = await DataBase.openDecks();
-
-        let versionExists = false;
-
-        for (let i = 0; i < decks.saved.length; ++i) {
-            const pl = decks.saved[i];
-            if (pl.id === toSave.id) {
-                versionExists = true;
-                decks.saved[i] = toSave;
-                break;
-            }
-        }
-
-        if (!versionExists) {
-            decks.saved.push(toSave);
-        }
-
-        await DataBase.saveDecks(decks);
+        return Object.values(decks.saved).some((d) => {
+            logger.write(d.name, deck.name);
+            if (d.id === deck.id) return false;
+            return d.name === deck.name;
+        });
     }
 
-    public async saveActiveDeck(nextActiveDeck): Promise<void> {
+    public async updateDeck(deck: SavedDeck): Promise<boolean> {
+        const decks = await DataBase.openDecks();
+
+        if (await this.deckNameExists(deck)) return false;
+        logger.write("Am saving da deck");
+
+        decks.saved[deck.id] = deck;
+        return true;
+    }
+
+    public async saveDeck(deck: SavedDeck): Promise<boolean> {
+        if (await this.deckNameExists(deck)) return false;
+        const decks = await DataBase.openDecks();
+        decks.saved[deck.id] = deck;
+        await DataBase.saveDecks(decks);
+        return true;
+    }
+
+    public async updateActiveDeck(nextActiveDeck: ActiveDeck): Promise<void> {
         const decks = await DataBase.openDecks();
         decks.active = nextActiveDeck;
         await DataBase.saveDecks(decks);

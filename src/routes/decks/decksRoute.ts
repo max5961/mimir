@@ -1,13 +1,14 @@
 import express from "express";
 import asyncHandler from "express-async-handler";
-import { Controller } from "./activeDeckController.js";
+import { Controller } from "./decksController.js";
 
-export const activeDeck = express.Router();
+export const decksRoute = express.Router();
 
-activeDeck
+decksRoute
     .get("/active", asyncHandler(Controller.getActiveDeck))
     .put("/active", asyncHandler(Controller.putActiveDeck))
     .post("/active", asyncHandler(Controller.postQuestionToActiveDeck))
     .post("/active/topic/:id", asyncHandler(Controller.postTopicToActiveDeck))
     .delete("/active/question/:id", asyncHandler(Controller.deleteQuestion))
-    .delete("/active/clear", asyncHandler(Controller.clearActiveDeck));
+    .delete("/active/clear", asyncHandler(Controller.clearActiveDeck))
+    .post("/saved/:name", asyncHandler(Controller.saveActiveDeckAs));

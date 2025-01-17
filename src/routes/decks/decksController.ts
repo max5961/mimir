@@ -1,7 +1,8 @@
 import express from "express";
 import { db } from "../../database/db.js";
-import { ActiveDeck, QuizQuestion } from "../../models/DeckModel.js";
+import { ActiveDeck, QuizQuestion, SavedDeck } from "../../models/DeckModel.js";
 import { TopicModel } from "../../models/TopicModel.js";
+import { randomUUID } from "crypto";
 
 type Req = express.Request;
 type Res = express.Response;
@@ -84,5 +85,28 @@ export class Controller {
     public static async clearActiveDeck(req: Req, res: Res) {
         await db.updateActiveDeck([]);
         res.status(200).json([]);
+    }
+
+    public static async saveActiveDeckAs(req: Req, res: Res) {
+        const activeDeck = req.body.activeDeck;
+        const name = req.params.deckName;
+
+        const savedDecks = await db.getAllSavedDecks();
+
+        if (Object.values(savedDecks).some((deck) => deck.name === name)) {
+            res.status(409).json({ error: "Name already exists" });
+            return;
+        }
+
+        const newSavedDeck: SavedDeck = {
+            id: randomUUID(),
+            name,
+            playlist: activeDeck,
+        };
+
+        // also change playlist to deck
+        // await db.saveNewDeck
+
+        res.status(200).json(newSavedDeck);
     }
 }

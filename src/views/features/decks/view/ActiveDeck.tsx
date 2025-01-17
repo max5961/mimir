@@ -11,12 +11,12 @@ import {
     useListItem,
 } from "tuir";
 import { Colors } from "../../../globals.js";
-import SavedPlaylists from "./SavedDecks.js";
 import DecksCommandLine from "./DecksCommandLine.js";
 import { useAppDispatch, useAppSelector } from "../../../store/store.js";
 import * as Slice from "../decksSlice.js";
 import { QuizQuestion } from "../../../../models/DeckModel.js";
 import { PreviewColumn } from "../../explorer/view/NextColumn.js";
+import { SavedDecks } from "./SavedDecks/SavedDecks.js";
 
 const boxStyles: Styles["Box"] = {
     height: "100",
@@ -52,8 +52,8 @@ export default function ActiveDeck(): React.ReactNode {
                 <Box height="100" width="100" flexShrink={1.6}>
                     <Preview />
                 </Box>
-                <SavedPlaylists />
             </Box>
+            <SavedDecks />
             <DecksCommandLine />
         </Box>
     );

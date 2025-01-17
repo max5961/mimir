@@ -8,7 +8,7 @@ import { shuffle } from "./shuffle.js";
 export const getActiveDeck = createAsyncThunk(
     `${name}/getActiveDeck`,
     async (_: undefined, { rejectWithValue }) => {
-        const response = await fetch(`${Path.Api.ActiveDeck}/active`, {
+        const response = await fetch(`${Path.Api.Decks}/active`, {
             method: "GET",
         });
 
@@ -25,7 +25,7 @@ export const shuffleActiveDeck = createAsyncThunk(
     async (currentActiveDeck: ActiveDeck, { rejectWithValue }) => {
         const shuffledDeck = shuffle(currentActiveDeck);
 
-        const response = await fetch(`${Path.Api.ActiveDeck}/active`, {
+        const response = await fetch(`${Path.Api.Decks}/active`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ activeDeck: shuffledDeck }),
@@ -42,7 +42,7 @@ export const shuffleActiveDeck = createAsyncThunk(
 export const pushQuestionToActiveDeck = createAsyncThunk(
     `${name}/pushQuestionToActiveDeck`,
     async (question: QuizQuestion, { rejectWithValue }) => {
-        const response = await fetch(`${Path.Api.ActiveDeck}/active`, {
+        const response = await fetch(`${Path.Api.Decks}/active`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ question }),
@@ -59,7 +59,7 @@ export const pushQuestionToActiveDeck = createAsyncThunk(
 export const pushTopicToActiveDeck = createAsyncThunk(
     `${name}/pushTopicToActiveDeck`,
     async (topicID: string, { rejectWithValue }) => {
-        const response = await fetch(`${Path.Api.ActiveDeck}/active/topic/${topicID}`, {
+        const response = await fetch(`${Path.Api.Decks}/active/topic/${topicID}`, {
             method: "POST",
         });
 
@@ -74,12 +74,9 @@ export const pushTopicToActiveDeck = createAsyncThunk(
 export const deleteQuestionFromActiveDeck = createAsyncThunk(
     `${name}/deleteQuestionFromActiveDeck`,
     async (questionID: string, { rejectWithValue }) => {
-        const response = await fetch(
-            `${Path.Api.ActiveDeck}/active/question/${questionID}`,
-            {
-                method: "DELETE",
-            },
-        );
+        const response = await fetch(`${Path.Api.Decks}/active/question/${questionID}`, {
+            method: "DELETE",
+        });
 
         if (!response.ok) {
             return rejectWithValue(response.status);
@@ -92,7 +89,7 @@ export const deleteQuestionFromActiveDeck = createAsyncThunk(
 export const clearActiveDeck = createAsyncThunk(
     `${name}/clearActiveDeck`,
     async (_, { rejectWithValue }) => {
-        const response = await fetch(`${Path.Api.ActiveDeck}/active/clear`, {
+        const response = await fetch(`${Path.Api.Decks}/active/clear`, {
             method: "DELETE",
         });
 
@@ -103,3 +100,7 @@ export const clearActiveDeck = createAsyncThunk(
         return (await response.json()) as ActiveDeck;
     },
 );
+
+// export const saveActiveDeckAs = createAsyncThunk(
+//     //
+// )

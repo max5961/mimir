@@ -24,7 +24,7 @@ export function PreviewColumn({ nextTopic, nextQuestion }: Props): React.ReactNo
     return (
         <Box
             styles={EStyles.ColumnBox}
-            titleTopCenter={{ title: "Preview", color: Colors.Primary }}
+            titleTopCenter={{ title: " Preview ", color: Colors.Primary }}
         >
             {nextTopic && (
                 <>

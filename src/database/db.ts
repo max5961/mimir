@@ -98,6 +98,12 @@ class Db {
         return decks.active;
     }
 
+    public async putActiveDeck(nextActiveDeck: ActiveDeck): Promise<void> {
+        const decks = await DataBase.openDecks();
+        decks.active = nextActiveDeck;
+        await DataBase.saveDecks(decks);
+    }
+
     public async getSavedDeckById(id: string): Promise<SavedDeck | null> {
         const decks = await DataBase.openDecks();
         const saved = decks.saved;
@@ -123,28 +129,25 @@ class Db {
         });
     }
 
-    public async updateDeck(deck: SavedDeck): Promise<boolean> {
+    public async updateSavedDeck(deck: SavedDeck): Promise<boolean> {
         const decks = await DataBase.openDecks();
 
         if (await this.deckNameExists(deck)) return false;
-        logger.write("Am saving da deck");
 
         decks.saved[deck.id] = deck;
+        await DataBase.saveDecks(decks);
+
         return true;
     }
 
-    public async saveDeck(deck: SavedDeck): Promise<boolean> {
+    public async saveNewDeck(deck: SavedDeck): Promise<boolean> {
         if (await this.deckNameExists(deck)) return false;
+
         const decks = await DataBase.openDecks();
         decks.saved[deck.id] = deck;
         await DataBase.saveDecks(decks);
-        return true;
-    }
 
-    public async updateActiveDeck(nextActiveDeck: ActiveDeck): Promise<void> {
-        const decks = await DataBase.openDecks();
-        decks.active = nextActiveDeck;
-        await DataBase.saveDecks(decks);
+        return true;
     }
 }
 

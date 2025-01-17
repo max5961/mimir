@@ -1,69 +1,24 @@
-import React, { useEffect } from "react";
+import React from "react";
+import { useAppDispatch, useAppSelector } from "../../../store/store.js";
+import * as Slice from "../decksSlice.js";
 import {
     Box,
     Color,
     HorizontalLine,
     List,
-    Styles,
     Text,
     useKeymap,
     useList,
     useListItem,
 } from "tuir";
 import { Colors } from "../../../globals.js";
-import DecksCommandLine from "./DecksCommandLine.js";
-import { useAppDispatch, useAppSelector } from "../../../store/store.js";
-import * as Slice from "../decksSlice.js";
 import { QuizQuestion } from "../../../../models/DeckModel.js";
-import { PreviewColumn } from "../../explorer/view/NextColumn.js";
-import { SavedDecks } from "./SavedDecks/SavedDecks.js";
-
-const boxStyles: Styles["Box"] = {
-    height: "100",
-    width: "100",
-    borderColor: Colors.Primary,
-    borderStyle: "round",
-};
-
-export default function ActiveDeck(): React.ReactNode {
-    const dispatch = useAppDispatch();
-
-    useEffect(() => {
-        dispatch(Slice.Actions.getActiveDeck());
-    }, []);
-
-    return (
-        <Box height="100" width="100" flexDirection="column">
-            <Box
-                height={3}
-                width="100"
-                flexShrink={0}
-                styles={boxStyles}
-                justifyContent="center"
-            >
-                <Text color={Colors.Primary} bold>
-                    Deck
-                </Text>
-            </Box>
-            <Box height="100" width="100">
-                <Box styles={boxStyles}>
-                    <ActiveList />
-                </Box>
-                <Box height="100" width="100" flexShrink={1.6}>
-                    <Preview />
-                </Box>
-            </Box>
-            <SavedDecks />
-            <DecksCommandLine />
-        </Box>
-    );
-}
 
 const FlexShrinkColumns = {
     Path: 3,
 };
 
-function ActiveList(): React.ReactNode {
+export function ActiveDeck(): React.ReactNode {
     const dispatch = useAppDispatch();
     const deck = useAppSelector(Slice.Selectors.activeDeck);
 
@@ -104,7 +59,7 @@ function ActiveList(): React.ReactNode {
 
 function ActiveListItem({ question }: { question: QuizQuestion }): React.ReactNode {
     const dispatch = useAppDispatch();
-    const { isFocus, onFocus } = useListItem();
+    const { isFocus, isShallowFocus, onFocus } = useListItem();
 
     onFocus(() => {
         dispatch(Slice.Actions.setPreview(question));
@@ -114,7 +69,8 @@ function ActiveListItem({ question }: { question: QuizQuestion }): React.ReactNo
     const questionColor = Colors.Alt;
 
     const textColor = (color: Color) => (isFocus ? undefined : color);
-    const bgColor = (color: Color) => (isFocus ? color : undefined);
+    const bgColor = (color: Color) =>
+        isFocus ? color : isShallowFocus ? "gray" : undefined;
 
     return (
         <Box height={1} flexShrink={0} width="100">
@@ -135,10 +91,4 @@ function ActiveListItem({ question }: { question: QuizQuestion }): React.ReactNo
             </Box>
         </Box>
     );
-}
-
-function Preview(): React.ReactNode {
-    const question = useAppSelector(Slice.Selectors.preview);
-
-    return <PreviewColumn nextQuestion={question} nextTopic={null} />;
 }

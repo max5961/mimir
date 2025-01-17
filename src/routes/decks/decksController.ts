@@ -16,7 +16,7 @@ export class Controller {
 
     public static async putActiveDeck(req: Req, res: Res, next: Next) {
         const nextActiveDeck = req.body.activeDeck as ActiveDeck;
-        await db.updateActiveDeck(nextActiveDeck);
+        await db.putActiveDeck(nextActiveDeck);
         res.status(200).json(nextActiveDeck);
     }
 
@@ -31,7 +31,7 @@ export class Controller {
         const deck = await db.getActiveDeck();
         if (!deck.some((q) => q.id === question.id)) {
             deck.push(question);
-            await db.updateActiveDeck(deck);
+            await db.putActiveDeck(deck);
         }
         res.status(200).json(deck);
     }
@@ -63,7 +63,7 @@ export class Controller {
 
         await push(topic);
 
-        await db.updateActiveDeck(activeDeck);
+        await db.putActiveDeck(activeDeck);
         res.status(200).json(activeDeck);
     }
 
@@ -78,12 +78,12 @@ export class Controller {
         }
 
         deck.splice(idx, 1);
-        await db.updateActiveDeck(deck);
+        await db.putActiveDeck(deck);
         res.status(200).json(deck);
     }
 
     public static async clearActiveDeck(req: Req, res: Res) {
-        await db.updateActiveDeck([]);
+        await db.putActiveDeck([]);
         res.status(200).json([]);
     }
 
@@ -91,22 +91,18 @@ export class Controller {
         const activeDeck = req.body.activeDeck;
         const name = req.params.deckName;
 
-        const savedDecks = await db.getAllSavedDecks();
-
-        if (Object.values(savedDecks).some((deck) => deck.name === name)) {
-            res.status(409).json({ error: "Name already exists" });
-            return;
-        }
-
-        const newSavedDeck: SavedDeck = {
+        const newDeck: SavedDeck = {
             id: randomUUID(),
             name,
-            playlist: activeDeck,
+            deck: activeDeck,
         };
 
-        // also change playlist to deck
-        // await db.saveNewDeck
+        const success = await db.saveNewDeck(newDeck);
 
-        res.status(200).json(newSavedDeck);
+        if (success) {
+            res.status(200).json(newDeck);
+        } else {
+            res.status(409).json({ error: "Name already exists" });
+        }
     }
 }

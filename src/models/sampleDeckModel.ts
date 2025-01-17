@@ -16,7 +16,7 @@ export const sampleDecks: Decks = {
         ["pl1"]: {
             id: "pl1",
             name: "General Knowledge",
-            playlist: [
+            deck: [
                 { ...sampleRoot.questions[2], path: "/" },
                 { ...sampleRoot.questions[3], path: "/" },
                 { ...sampleRoot.subTopics[0].questions[1], path: "/Science" },

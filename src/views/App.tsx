@@ -3,9 +3,8 @@ import { Box, Pages, useKeymap, usePages, Viewport } from "tuir";
 import { useAppDispatch } from "./store/store.js";
 import { RootTopic } from "../root.js";
 import Explorer from "./features/explorer/view/Explorer.js";
-import Form from "./features/form/view/Form.js";
 import * as ExpSlice from "./features/explorer/explorerSlice.js";
-import ActiveDeck from "./features/decks/view/ActiveDeck.js";
+import DecksView from "./features/decks/view/DecksView.js";
 import Quiz from "./features/quiz/view/Quiz.js";
 
 export default function App(): React.ReactNode {
@@ -41,7 +40,7 @@ export default function App(): React.ReactNode {
         <Viewport flexDirection="column">
             <Box height="100" width="100">
                 <Pages pageView={pageView}>
-                    <ActiveDeck />
+                    <DecksView />
                     <Explorer />
                     <Quiz />
                 </Pages>

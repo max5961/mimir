@@ -35,7 +35,7 @@ const question4: QuestionModel = {
 const savedPl1 = {
     id: "saved_pl1_id",
     name: "FooPlaylist",
-    playlist: [
+    deck: [
         { path: "/", ...question1 },
         { path: "/", ...question2 },
         { path: "/", ...question3 },
@@ -225,16 +225,16 @@ describe("Playlist data", () => {
     const newPlaylist: SavedDeck = {
         id: "new pl",
         name: "New Playlist",
-        playlist: [{ id: "1", path: "/", type: "qa", question: "Foo", answer: "Bar" }],
+        deck: [{ id: "1", path: "/", type: "qa", question: "Foo", answer: "Bar" }],
     };
 
-    test("Get active playlist", async () => {
+    test("Get active deck", async () => {
         const [q1, q2] = await db.getActiveDeck();
         expect(q1).toEqual({ path: "/", ...question1 });
         expect(q2).toEqual({ path: "/", ...question2 });
     });
 
-    test("Get playlist data by id", async () => {
+    test("Get deck data by id", async () => {
         const pl = await db.getSavedDeckById(savedPl1.id);
         expect(pl).toEqual(savedPl1);
     });
@@ -247,8 +247,8 @@ describe("Playlist data", () => {
         });
     });
 
-    test("Save new playlist", async () => {
-        await db.saveDeck(newPlaylist);
+    test("Save new deck", async () => {
+        await db.saveNewDeck(newPlaylist);
         const all = await db.getAllSavedDecks();
 
         expect(all).toEqual({
@@ -257,14 +257,15 @@ describe("Playlist data", () => {
         });
     });
 
-    test("Save existing playlist", async () => {
-        const updatedPlaylist: SavedDeck = { ...savedPl1, name: "Updated Playlist" };
-        await db.updateDeck(updatedPlaylist);
+    test("Save existing deck", async () => {
+        const updatedPl1: SavedDeck = { ...savedPl1, name: "Updated Playlist" };
+        await db.updateSavedDeck(updatedPl1);
 
         const all = await db.getAllSavedDecks();
+
         expect(all).toEqual({
             [newPlaylist.id]: { ...newPlaylist },
-            [savedPl1.id]: { ...savedPl1 },
+            [savedPl1.id]: { ...updatedPl1 },
         });
     });
 });

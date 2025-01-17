@@ -6,7 +6,7 @@ import { TopicModel } from "../models/TopicModel.js";
 import { IndexableFileData } from "./IndexableFileData.js";
 import { sampleRoot } from "../models/sampleTopicModel.js";
 import { Decks } from "../models/DeckModel.js";
-import { sampleDecks } from "../models/samplePlaylistModel.js";
+import { sampleDecks } from "../models/sampleDeckModel.js";
 
 export const RootTopicName = "$$ROOT";
 

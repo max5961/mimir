@@ -1,5 +1,6 @@
 import { RootState } from "../../store/store.js";
 import { createSelector } from "@reduxjs/toolkit";
+import * as DeckSlice from "../decks/decksSlice.js";
 
 export const questions = (state: RootState) => state.quiz.questions;
 export const stats = createSelector([questions], (questions) => {
@@ -19,3 +20,10 @@ export const stats = createSelector([questions], (questions) => {
         incorrect,
     };
 });
+
+export const quizView = createSelector(
+    [DeckSlice.Selectors.activeDeck, questions],
+    (activeDeck, questions) => {
+        return { activeDeck, questions };
+    },
+);

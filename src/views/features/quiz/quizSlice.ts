@@ -5,12 +5,10 @@ import { QuizQuestion } from "../../../models/DeckModel.js";
 export type Question = QuizQuestion & { status: "correct" | "incorrect" | "unanswered" };
 
 type State = {
-    capitalization: boolean;
     questions: Question[];
 };
 
 const initialState: State = {
-    capitalization: true,
     questions: [],
 };
 

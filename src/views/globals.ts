@@ -6,6 +6,7 @@ type Colors = {
     Alt: Color;
     ShallowFocus: Color;
     Error: Color;
+    Success: Color;
     Warn: Color;
 };
 
@@ -15,14 +16,22 @@ export const Colors: Colors = {
     Alt: "cyan",
     ShallowFocus: "gray",
     Error: "red",
+    Success: "green",
     Warn: "yellow",
 };
 
-// export const Colors: Colors = {
-//     Primary: "magenta",
-//     Secondary: "green",
-//     Alt: "blue",
-//     ShallowFocus: "gray",
-//     Error: "red",
-//     Warn: "yellow",
-// };
+type Icons = {
+    Check: string;
+    X: string;
+    SingleLine: string;
+    MultiLine: string;
+    Bullet: string;
+};
+
+export const Icons: Icons = {
+    Check: "✓",
+    X: "✕",
+    SingleLine: "─",
+    MultiLine: "≡",
+    Bullet: "⏺",
+};

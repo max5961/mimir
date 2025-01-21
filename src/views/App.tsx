@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Box, Pages, useKeymap, usePages, Viewport } from "tuir";
+import { Box, Pages, useApp, useKeymap, usePages, Viewport } from "tuir";
 import { useAppDispatch } from "./store/store.js";
 import { RootTopic } from "../root.js";
 import Explorer from "./features/explorer/view/Explorer.js";
@@ -9,6 +9,7 @@ import DecksView from "./features/decks/view/DecksView.js";
 import Quiz from "./features/quiz/view/Quiz.js";
 
 export default function App(): React.ReactNode {
+    const { exit } = useApp();
     const dispatch = useAppDispatch();
 
     useEffect(() => {
@@ -30,12 +31,17 @@ export default function App(): React.ReactNode {
             { input: "8" },
             { input: "9" },
         ],
+        quit: { input: "q" },
     });
 
     useEvent("goToPage", (char: string) => {
         const num = Number(char);
         if (Number.isNaN(num)) return;
         control.goToPage(num - 1);
+    });
+
+    useEvent("quit", () => {
+        exit();
     });
 
     return (

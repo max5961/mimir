@@ -17,7 +17,7 @@ const quizSlice = createSlice({
     initialState,
     reducers: {
         setQuestionsArray(state: State, action: PayloadAction<Question[]>) {
-            state.questions = action.payload;
+            state.questions = [...action.payload];
         },
         setQuestion(
             state: State,

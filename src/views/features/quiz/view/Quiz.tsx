@@ -3,9 +3,11 @@ import {
     Box,
     HorizontalLine,
     List,
+    Node,
     Text,
     useKeymap,
     useList,
+    useNodeMap,
     usePage,
     useViewportDimensions,
 } from "tuir";
@@ -15,13 +17,15 @@ import { Colors } from "../../../globals.js";
 import { QuestionStatus } from "./QuestionStatus.js";
 import * as Slice from "../quizSlice.js";
 import { QuizStats } from "./QuizStats.js";
+import { Finale } from "./Finale.js";
 
 export default function Quiz(): React.ReactNode {
     const dispatch = useAppDispatch();
     const { activeDeck, questions } = useAppSelector(Slice.Selectors.quizView);
     const { onPageFocus, onPageBlur } = usePage();
 
-    const { listView, control } = useList(questions.length, {
+    // list length + 1 to account to finish page
+    const { listView, control } = useList(questions.length + 1, {
         navigation: "none",
         windowSize: 1,
         unitSize: "fit-unit",
@@ -33,7 +37,11 @@ export default function Quiz(): React.ReactNode {
     });
 
     useEvent("next", control.nextItem);
-    useEvent("prev", control.prevItem);
+    useEvent("prev", () => {
+        if (control.currentIndex < questions.length) {
+            control.prevItem();
+        }
+    });
 
     onPageFocus(() => {
         dispatch(
@@ -71,18 +79,20 @@ export default function Quiz(): React.ReactNode {
                 borderColor={Colors.Primary}
             >
                 <Box width="100" flexDirection="column" gap={3} paddingY={1} paddingX={2}>
-                    <Box flexDirection="column">
-                        <Box
-                            height={1}
-                            width="100"
-                            flexShrink={0}
-                            justifyContent="space-between"
-                        >
-                            <Text>{progressText}</Text>
-                            <QuestionStatus status={curr?.status} />
+                    {control.currentIndex < questions.length && (
+                        <Box flexDirection="column">
+                            <Box
+                                height={1}
+                                width="100"
+                                flexShrink={0}
+                                justifyContent="space-between"
+                            >
+                                <Text>{progressText}</Text>
+                                <QuestionStatus status={curr?.status} />
+                            </Box>
+                            <HorizontalLine dimColor />
                         </Box>
-                        <HorizontalLine dimColor />
-                    </Box>
+                    )}
                     <Box minHeight={11} width="100">
                         <List
                             listView={listView}
@@ -100,6 +110,11 @@ export default function Quiz(): React.ReactNode {
                                     ></DynamicQuestionView>
                                 );
                             })}
+                            <Finale
+                                goToStart={() => {
+                                    control.goToIndex(0);
+                                }}
+                            />
                         </List>
                     </Box>
                     <QuizStats />

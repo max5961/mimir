@@ -41,27 +41,22 @@ export function ModifySavedDecks(): React.ReactNode {
 
 function SavedDecksList(): React.ReactNode {
     const { register, control } = useNodeMap(
-        [["saveActiveAs"], ["addActiveTo"], ["loadSaved"]],
+        [["saveActiveAs"], ["loadSaved"], ["addActiveTo"]],
         {
             navigation: "none",
         },
     );
-
-    // Save Active As
-    // Add Active To
-    // Load: Unsaved Active
-    // Load: Saved Active [List]
 
     return (
         <Box flexBasis="100" flexDirection="column">
             <Node {...register("saveActiveAs")}>
                 <SaveActiveAs />
             </Node>
-            <Node.Box {...register("addActiveTo")} height="100">
-                <AddActiveTo />
-            </Node.Box>
             <Node.Box {...register("loadSaved")} height="100">
                 <LoadSavedDeck />
+            </Node.Box>
+            <Node.Box {...register("addActiveTo")} height="100">
+                <AddActiveTo />
             </Node.Box>
         </Box>
     );

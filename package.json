@@ -1,11 +1,12 @@
 {
     "name": "@mmorrissey5961/mimir",
-    "version": "1.0.1",
+    "version": "1.0.6",
     "description": "",
     "main": "dist/root.js",
     "scripts": {
-        "start": "tsc && NODE_ENV=development node ./dist/root.js",
-        "test": "tsc && NODE_ENV=test npx vitest",
+        "compile": "tsc && cp .env.development ./dist/. && cp .env.production ./dist/. && cp .env.test ./dist/.",
+        "start": "npm run compile && NODE_ENV=development node ./dist/root.js",
+        "test": "npm run compile && NODE_ENV=test npx vitest",
         "watch": "tsc --watch",
         "update": "npx directlink --update",
         "start:update": "npm run update && npm run start",

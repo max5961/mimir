@@ -1,9 +1,15 @@
 import dotenv from "dotenv";
 import path from "path";
 import os from "os";
+import { fileURLToPath } from "url";
+
+const filename = fileURLToPath(import.meta.url);
+const dirname = path.dirname(filename);
 
 process.env.NODE_ENV = process.env.NODE_ENV ?? "production";
-dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
+dotenv.config({
+    path: path.resolve(dirname, "../../dist", `.env.${process.env.NODE_ENV}`),
+});
 
 if (!process.env.DB_DIR) throw new Error("Cannot find env var 'DB_DIR'");
 if (!process.env.TOPICS_PATH) throw new Error("Cannot find env var 'TOPICS_PATH'");

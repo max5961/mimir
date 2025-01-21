@@ -9,6 +9,10 @@ export const serverLogger = new Logger();
 serverLogger.setFile("server.log");
 
 export function log(req: Req, res: Res, next: Next) {
+    if (process.env.NODE_ENV === "production") {
+        return next();
+    }
+
     switch (req.method) {
         case "GET":
             serverLogger.setColor("green");

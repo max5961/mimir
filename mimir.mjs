@@ -1,3 +1,5 @@
 #!/usr/bin/env node
 
-import("./dist/root.js");
+(async () => {
+    await import("./dist/root.js");
+})();

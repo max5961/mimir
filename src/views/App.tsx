@@ -4,6 +4,7 @@ import { useAppDispatch } from "./store/store.js";
 import { RootTopic } from "../root.js";
 import Explorer from "./features/explorer/view/Explorer.js";
 import * as ExpSlice from "./features/explorer/explorerSlice.js";
+import * as DecksSlice from "./features/decks/decksSlice.js";
 import DecksView from "./features/decks/view/DecksView.js";
 import Quiz from "./features/quiz/view/Quiz.js";
 
@@ -12,6 +13,7 @@ export default function App(): React.ReactNode {
 
     useEffect(() => {
         dispatch(ExpSlice.Actions.getTopicData({ topicID: RootTopic.id }));
+        dispatch(DecksSlice.Actions.getSavedDecks());
     }, []);
 
     const { pageView, control } = usePages(3);

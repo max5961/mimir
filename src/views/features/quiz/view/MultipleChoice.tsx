@@ -1,15 +1,26 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import * as Slice from "../quizSlice.js";
 import { shuffle } from "../../decks/shuffle.js";
-import { Box, HorizontalLine, List, Text, useKeymap, useList, useListItem } from "tuir";
+import {
+    Box,
+    Color,
+    HorizontalLine,
+    List,
+    Text,
+    useKeymap,
+    useList,
+    useListItem,
+} from "tuir";
 import { MultipleChoiceOpt } from "../../../../models/QuestionModel.js";
 import { DynamicQuestionProps } from "./DynamicQuestionView.js";
 import { useAppDispatch } from "../../../store/store.js";
+import { Colors } from "../../../globals.js";
 
 export function MultipleChoice({
     question: { question, multipleChoiceAnswer, a, b, c, d },
 }: DynamicQuestionProps): React.ReactNode {
     const { onBlur, isFocus, itemIndex } = useListItem();
+    const [flash, setFlash] = useState(false);
 
     const opts = useMemo(getOpts, [a, b, c, d, isFocus]);
 
@@ -20,12 +31,30 @@ export function MultipleChoice({
 
     onBlur(() => {
         control.goToIndex(0);
+        clear.current();
     });
 
     function getOpts() {
         const arr = [a, b, c, d].filter((opt) => opt !== undefined);
         return shuffle(arr);
     }
+
+    const { useEvent } = useKeymap({ flash: { input: "a" } });
+
+    const clear = useRef(() => {});
+    useEvent("flash", () => {
+        const id = setInterval(() => {
+            setFlash((flash) => !flash);
+        }, 500);
+
+        const clearInt = () => {
+            clearInterval(id);
+            setFlash(false);
+        };
+
+        clear.current = clearInt;
+        setTimeout(clearInt, 2000);
+    });
 
     return (
         <Box flexDirection="column">
@@ -34,6 +63,12 @@ export function MultipleChoice({
             <List listView={listView} fitY>
                 {opts.map((opt, idx) => {
                     const letter = String.fromCharCode(65 + idx);
+                    let overrideColor: Color | undefined;
+
+                    if (flash && opt.id === multipleChoiceAnswer) {
+                        overrideColor = Colors.Success;
+                    }
+
                     return (
                         <MultipleChoiceOpt
                             key={opt.id}
@@ -41,6 +76,7 @@ export function MultipleChoice({
                             multipleChoiceAnswer={multipleChoiceAnswer!}
                             opt={opt}
                             questionIdx={itemIndex}
+                            overrideColor={overrideColor}
                         />
                     );
                 })}
@@ -54,22 +90,28 @@ function MultipleChoiceOpt({
     opt,
     multipleChoiceAnswer,
     questionIdx,
+    overrideColor,
 }: {
     letter: string;
     opt: MultipleChoiceOpt;
     multipleChoiceAnswer: string;
     questionIdx: number;
+    overrideColor?: Color;
 }): React.ReactNode {
     const dispatch = useAppDispatch();
     const { isFocus, onBlur } = useListItem();
     const [chosen, setChosen] = useState(false);
+
     const chosenColor = opt.id === multipleChoiceAnswer ? "green" : "red";
 
     onBlur(() => {
         setChosen(false);
     });
 
-    const { useEvent } = useKeymap({ choose: { key: "return" } });
+    const { useEvent } = useKeymap({
+        choose: { key: "return" },
+    });
+
     useEvent("choose", () => {
         dispatch(
             Slice.Actions.setQuestion({
@@ -82,12 +124,20 @@ function MultipleChoiceOpt({
         });
     });
 
-    const color = chosen ? chosenColor : isFocus ? "blue" : undefined;
+    const color = overrideColor ?? (chosen ? chosenColor : isFocus ? "blue" : undefined);
     const borderStyle = isFocus ? "bold" : "round";
 
     return (
-        <Box width="100" height={3} borderStyle={borderStyle} borderColor={color}>
-            <Text color={color}>{`${letter}: ${opt.value}`}</Text>
+        <Box
+            width="100"
+            height={3}
+            borderStyle={borderStyle}
+            borderColor={color}
+            backgroundColor={overrideColor}
+        >
+            <Text
+                color={overrideColor ? undefined : color}
+            >{`${letter}: ${opt.value}`}</Text>
         </Box>
     );
 }

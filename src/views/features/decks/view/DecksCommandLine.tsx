@@ -11,18 +11,18 @@ export default function DecksCommandLine(): React.ReactNode {
 
     const config: CliConfig = {
         commands: {
-            ["save"]: (args) => {
-                if (!args.length) {
-                    return Promise.reject("Provide a name to save the deck as!");
-                }
-
-                // dispatch(
-                //     Slice.Actions.saveDeckAs({
-                //         activeDeck,
-                //         name: args[0]
-                //     }),
-                // );
-            },
+            // ["save"]: (args) => {
+            //     if (!args.length) {
+            //         return Promise.reject("Provide a name to save the deck as!");
+            //     }
+            //
+            //     // dispatch(
+            //     //     Slice.Actions.saveDeckAs({
+            //     //         activeDeck,
+            //     //         name: args[0]
+            //     //     }),
+            //     // );
+            // },
         },
         prompts(setValue) {
             return [

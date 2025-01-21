@@ -11,4 +11,10 @@ decksRoute
     .post("/active/topic/:id", asyncHandler(Controller.postTopicToActiveDeck))
     .delete("/active/question/:id", asyncHandler(Controller.deleteQuestion))
     .delete("/active/clear", asyncHandler(Controller.clearActiveDeck))
-    .post("/saved/:name", asyncHandler(Controller.saveActiveDeckAs));
+    .get("/saved", asyncHandler(Controller.getSavedDecks))
+    .post("/saved/:name", asyncHandler(Controller.saveActiveDeckAs))
+    .delete("/saved/:id", asyncHandler(Controller.deleteSavedDeck))
+    .post(
+        "/saved/from-active/:targetID",
+        asyncHandler(Controller.postToSavedFromActiveDeck),
+    );

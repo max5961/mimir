@@ -88,8 +88,8 @@ export class Controller {
     }
 
     public static async saveActiveDeckAs(req: Req, res: Res) {
-        const activeDeck = req.body.activeDeck;
-        const name = req.params.deckName;
+        const activeDeck = req.body.activeDeck as ActiveDeck;
+        const name = req.params.name;
 
         const newDeck: SavedDeck = {
             id: randomUUID(),
@@ -97,12 +97,54 @@ export class Controller {
             deck: activeDeck,
         };
 
-        const success = await db.saveNewDeck(newDeck);
+        await db.saveDeck(newDeck);
 
-        if (success) {
-            res.status(200).json(newDeck);
-        } else {
-            res.status(409).json({ error: "Name already exists" });
+        const savedDeckStore = await db.getAllSavedDecks();
+
+        res.status(200).json(savedDeckStore);
+    }
+
+    public static async getSavedDecks(req: Req, res: Res) {
+        const savedDeckStore = await db.getAllSavedDecks();
+        res.status(200).json(savedDeckStore);
+    }
+
+    public static async deleteSavedDeck(req: Req, res: Res) {
+        const id = req.params.id;
+        const decks = await db.getAllSavedDecks();
+
+        if (!decks[id]) {
+            res.status(404).json({ error: `Cannot find saved deck with id: ${id}` });
+            return;
         }
+
+        delete decks[id];
+        await db.saveAllSavedDecks(decks);
+        res.status(200).json(decks);
+    }
+
+    public static async postToSavedFromActiveDeck(req: Req, res: Res) {
+        const targetID = req.params.targetID;
+        const activeDeck = req.body.activeDeck as ActiveDeck;
+
+        const decks = await db.getAllSavedDecks();
+
+        if (!decks[targetID]) {
+            res.status(404).json({
+                error: `Cannot find saved deck with id: ${targetID}`,
+            });
+            return;
+        }
+
+        const targetDeck = decks[targetID];
+
+        activeDeck.forEach((question) => {
+            if (!targetDeck.deck.some((q) => q.id === question.id)) {
+                targetDeck.deck.push(question);
+            }
+        });
+
+        await db.saveAllSavedDecks(decks);
+        res.status(200).json(decks);
     }
 }

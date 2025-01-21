@@ -1,11 +1,17 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { ActiveDeck, Decks, QuizQuestion } from "../../../models/DeckModel.js";
+import { createSlice, PayloadAction, StateFromReducersMapObject } from "@reduxjs/toolkit";
+import {
+    ActiveDeck,
+    Decks,
+    QuizQuestion,
+    SavedDeckStore,
+} from "../../../models/DeckModel.js";
 import { name } from "./sliceName.js";
 import * as Thunks from "./thunks.js";
 import { CliMessage } from "tuir";
 
 type State = Decks & {
     preview: QuizQuestion | null;
+    previewSaved: QuizQuestion[] | null;
     message?: CliMessage;
 };
 
@@ -13,6 +19,7 @@ const initialState: State = {
     active: [],
     saved: {},
     preview: null,
+    previewSaved: null,
     message: undefined,
 };
 
@@ -22,6 +29,12 @@ const decksSlice = createSlice({
     reducers: {
         setPreview(state: State, action: PayloadAction<QuizQuestion | null>) {
             state.preview = action.payload;
+        },
+        setSavedPreview(state: State, action: PayloadAction<QuizQuestion[]>) {
+            state.previewSaved = action.payload;
+        },
+        setActiveDeck(state: State, action: PayloadAction<ActiveDeck>) {
+            state.active = action.payload;
         },
     },
     extraReducers: (builder) => {
@@ -37,9 +50,24 @@ const decksSlice = createSlice({
                     updateActiveDeck(state, action);
                     state.message = ["RESOLVE", "Deck cleared"];
                 },
-            );
+            )
+            .addCase(Thunks.saveActiveDeckAs.fulfilled, updateSavedDecks)
+            .addCase(Thunks.getSavedDecks.fulfilled, updateSavedDecks)
+            .addCase(Thunks.deleteSavedDeck.fulfilled, updateSavedDecks)
+            .addCase(Thunks.postActiveToSaved.fulfilled, updateSavedDecks);
     },
 });
+
+function updateSavedDecks(
+    state: State,
+    action: PayloadAction<SavedDeckStore | undefined>,
+) {
+    if (!action.payload) return;
+    state.saved = action.payload;
+    if (!Object.values(action.payload).length) {
+        state.previewSaved = null;
+    }
+}
 
 function updateActiveDeck(state: State, action: PayloadAction<ActiveDeck | undefined>) {
     if (!action.payload) return;

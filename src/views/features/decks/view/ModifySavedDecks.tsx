@@ -3,6 +3,7 @@ import {
     Box,
     HorizontalLine,
     Node,
+    Styles,
     Text,
     TextInput,
     useKeymap,
@@ -11,6 +12,10 @@ import {
     useTextInput,
 } from "tuir";
 import { Colors } from "../../../globals.js";
+import { useAppDispatch, useAppSelector } from "../../../store/store.js";
+import * as Slice from "../decksSlice.js";
+import { AddActiveTo, LoadSavedDeck } from "./SavedDeckLists.js";
+import { PreviewCurrentSaved } from "./Preview.js";
 
 export function ModifySavedDecks(): React.ReactNode {
     const color = Colors.Secondary;
@@ -23,47 +28,66 @@ export function ModifySavedDecks(): React.ReactNode {
             borderColor={color}
             titleTopCenter={{ title: " Saved Decks ", color }}
         >
-            <Box flexBasis="100" flexShrink={2.5}>
+            <Box width="100" height="40" flexShrink={0}>
                 <SavedDecksList />
             </Box>
-            <HorizontalLine color={color} dimColor />
-            <Box flexBasis="100"></Box>
+            <Box width="100" height="60" flexShrink={0} flexDirection="column">
+                <HorizontalLine color={color} dimColor />
+                <PreviewCurrentSaved />
+            </Box>
         </Box>
     );
 }
 
 function SavedDecksList(): React.ReactNode {
-    const { register, control } = useNodeMap([["add-current"], ["saved-list"]], {
-        navigation: "none",
-    });
+    const { register, control } = useNodeMap(
+        [["saveActiveAs"], ["addActiveTo"], ["loadSaved"]],
+        {
+            navigation: "none",
+        },
+    );
 
-    const { useEvent } = useKeymap({ down: { input: "j" }, up: { input: "k" } });
-
-    useEvent("up", () => control.up());
-    useEvent("down", () => control.down());
+    // Save Active As
+    // Add Active To
+    // Load: Unsaved Active
+    // Load: Saved Active [List]
 
     return (
         <Box flexBasis="100" flexDirection="column">
-            <Node {...register("add-current")}>
-                <AddCurrent />
+            <Node {...register("saveActiveAs")}>
+                <SaveActiveAs />
             </Node>
-            <Node {...register("saved-list")}>
-                <SavedLists />
-            </Node>
-            <PreviewCurrentSaved />
+            <Node.Box {...register("addActiveTo")} height="100">
+                <AddActiveTo />
+            </Node.Box>
+            <Node.Box {...register("loadSaved")} height="100">
+                <LoadSavedDeck />
+            </Node.Box>
         </Box>
     );
 }
 
-function AddCurrent(): React.ReactNode {
-    const { isFocus } = useNode();
-    const { onChange } = useTextInput();
+function SaveActiveAs(): React.ReactNode {
+    const dispatch = useAppDispatch();
+    const { activeDeck } = useAppSelector(Slice.Selectors.SaveActiveAs);
+    const { isFocus, control } = useNode();
+    const { onChange, setValue } = useTextInput();
 
-    const color = isFocus ? Colors.Primary : Colors.Secondary;
+    const { useEvent } = useKeymap({ down: [{ input: "j" }, { key: "down" }] });
+    useEvent("down", () => control.down());
+
+    const color = isFocus ? Colors.Secondary : Colors.ShallowFocus;
+    const borderStyle: Styles["Box"]["borderStyle"] = isFocus ? "double" : "round";
+
+    const onExit = (value: string) => {
+        if (!value) return;
+        dispatch(Slice.Actions.saveActiveDeckAs({ name: value, activeDeck }));
+        setValue("");
+    };
 
     return (
         <Box
-            borderStyle="round"
+            borderStyle={borderStyle}
             borderColor={color}
             height={3}
             flexShrink={0}
@@ -72,19 +96,11 @@ function AddCurrent(): React.ReactNode {
             marginBottom={1}
         >
             <Box flexShrink={0}>
-                <Text>{"Save Current: "}</Text>
+                <Text>{"Save Active As: "}</Text>
             </Box>
             <Box>
-                <TextInput onChange={onChange} />
+                <TextInput onChange={onChange} onExit={onExit} />
             </Box>
         </Box>
     );
-}
-
-function SavedLists(): React.ReactNode {
-    return <Box flexBasis="100"></Box>;
-}
-
-function PreviewCurrentSaved(): React.ReactNode {
-    return <Box flexBasis="100"></Box>;
 }

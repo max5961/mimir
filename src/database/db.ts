@@ -123,10 +123,19 @@ class Db {
     public async deckNameExists(deck: SavedDeck): Promise<boolean> {
         const decks = await DataBase.openDecks();
         return Object.values(decks.saved).some((d) => {
-            logger.write(d.name, deck.name);
             if (d.id === deck.id) return false;
             return d.name === deck.name;
         });
+    }
+
+    public async getIdToOverwriteSavedDeck(deck: SavedDeck): Promise<null | string> {
+        const decks = await DataBase.openDecks();
+        for (const saved of Object.values(decks.saved)) {
+            if (saved.name === deck.name) {
+                return saved.id;
+            }
+        }
+        return null;
     }
 
     public async updateSavedDeck(deck: SavedDeck): Promise<boolean> {
@@ -148,6 +157,28 @@ class Db {
         await DataBase.saveDecks(decks);
 
         return true;
+    }
+
+    public async saveDeck(deck: SavedDeck): Promise<void> {
+        const decks = await DataBase.openDecks();
+
+        if (await this.deckNameExists(deck)) {
+            const id = await this.getIdToOverwriteSavedDeck(deck);
+            if (id) {
+                decks.saved[id] = { ...deck, id: id };
+                await DataBase.saveDecks(decks);
+                return;
+            }
+        }
+
+        decks.saved[deck.id] = deck;
+        await DataBase.saveDecks(decks);
+    }
+
+    public async saveAllSavedDecks(saved: SavedDeckStore): Promise<void> {
+        const decks = await DataBase.openDecks();
+        decks.saved = saved;
+        await DataBase.saveDecks(decks);
     }
 }
 

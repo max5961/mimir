@@ -4,7 +4,6 @@ import { Colors } from "../../../globals.js";
 import DecksCommandLine from "./DecksCommandLine.js";
 import { useAppDispatch } from "../../../store/store.js";
 import * as Slice from "../decksSlice.js";
-import { SavedDecks } from "./SavedDecks/SavedDecks.js";
 import { ActiveDeck } from "./ActiveDeck.js";
 import { Preview } from "./Preview.js";
 import { ModifySavedDecks } from "./ModifySavedDecks.js";
@@ -22,6 +21,7 @@ export default function DecksView(): React.ReactNode {
 
     useEffect(() => {
         dispatch(Slice.Actions.getActiveDeck());
+        dispatch(Slice.Actions.getSavedDecks());
     }, []);
 
     const { register, control } = useNodeMap([["activeDeck", "previewAndSavedDecks"]], {
@@ -79,7 +79,6 @@ export default function DecksView(): React.ReactNode {
                     <PreviewAndSavedDecks />
                 </Node.Box>
             </Box>
-            <SavedDecks />
             <DecksCommandLine />
         </Box>
     );

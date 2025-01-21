@@ -2,7 +2,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import fetch from "node-fetch";
 import { name } from "./sliceName.js";
 import { Path } from "../../../root.js";
-import { ActiveDeck, QuizQuestion } from "../../../models/DeckModel.js";
+import { ActiveDeck, QuizQuestion, SavedDeckStore } from "../../../models/DeckModel.js";
 import { shuffle } from "./shuffle.js";
 
 export const getActiveDeck = createAsyncThunk(
@@ -101,6 +101,70 @@ export const clearActiveDeck = createAsyncThunk(
     },
 );
 
-// export const saveActiveDeckAs = createAsyncThunk(
-//     //
-// )
+export const getSavedDecks = createAsyncThunk(
+    `${name}/getSavedDecks`,
+    async (_, { rejectWithValue }) => {
+        const response = await fetch(`${Path.Api.Decks}/saved`, { method: "GET" });
+
+        if (!response.ok) {
+            rejectWithValue(response.status);
+        }
+
+        return (await response.json()) as SavedDeckStore;
+    },
+);
+
+export const saveActiveDeckAs = createAsyncThunk(
+    `${name}/saveActiveDeck`,
+    async (
+        { name, activeDeck }: { name: string; activeDeck: ActiveDeck },
+        { rejectWithValue },
+    ) => {
+        const response = await fetch(`${Path.Api.Decks}/saved/${name}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ activeDeck }),
+        });
+
+        if (!response.ok) {
+            rejectWithValue(response.status);
+        }
+
+        return (await response.json()) as SavedDeckStore;
+    },
+);
+
+export const deleteSavedDeck = createAsyncThunk(
+    `${name}/deleteSavedDeck`,
+    async (id: string, { rejectWithValue }) => {
+        const response = await fetch(`${Path.Api.Decks}/saved/${id}`, {
+            method: "DELETE",
+        });
+
+        if (!response.ok) {
+            return rejectWithValue(response.status);
+        }
+
+        return (await response.json()) as SavedDeckStore;
+    },
+);
+
+export const postActiveToSaved = createAsyncThunk(
+    `${name}/postActiveToSaved`,
+    async (
+        { activeDeck, targetID }: { activeDeck: ActiveDeck; targetID: string },
+        { rejectWithValue },
+    ) => {
+        const response = await fetch(`${Path.Api.Decks}/saved/from-active/${targetID}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ activeDeck }),
+        });
+
+        if (!response.ok) {
+            return rejectWithValue(response.status);
+        }
+
+        return (await response.json()) as SavedDeckStore;
+    },
+);

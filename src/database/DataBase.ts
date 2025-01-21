@@ -94,12 +94,22 @@ export class DataBase {
             subTopics: [],
         };
 
+        const decks: Decks = {
+            active: [],
+            saved: {},
+        };
+
         const topicFileExists = existsSync(TopicsPath);
+        const decksFileExists = existsSync(DecksPath);
 
         if (!topicFileExists) {
             writeFileSync(TopicsPath, JSON.stringify(rootTopic), {
                 encoding: "utf-8",
             });
+        }
+
+        if (!decksFileExists) {
+            writeFileSync(DecksPath, JSON.stringify(decks), { encoding: "utf-8" });
         }
 
         if (NodeEnv === "development") {

@@ -8,8 +8,6 @@ export function Finale({ goToStart }: { goToStart: () => void }): React.ReactNod
     const { unanswered, incorrect } = useAppSelector(Slice.Selectors.statsArrays);
     const { onFocus } = useListItem();
 
-    console.log({ unl: unanswered.length, inc: incorrect.length });
-
     const length =
         unanswered.length && incorrect.length
             ? 3

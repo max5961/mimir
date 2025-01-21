@@ -1,6 +1,6 @@
 {
-    "name": "novi",
-    "version": "1.0.0",
+    "name": "@mmorrissey5961/mimir",
+    "version": "1.0.1",
     "description": "",
     "main": "dist/root.js",
     "scripts": {
@@ -13,6 +13,9 @@
         "log:console": "npm run log",
         "log:server": "touch server.log && tail --follow server.log",
         "log:store": "touch store.log && tail --follow store.log"
+    },
+    "bin": {
+        "mimir": "mimir.mjs"
     },
     "keywords": [],
     "author": "",
@@ -39,6 +42,9 @@
         "typescript": "^5.6.0",
         "vitest": "^2.1.8"
     },
+    "bundledDependencies": [
+        "tuir"
+    ],
     "type": "module",
     "directlinks": {
         "/home/max/repos/tuir": []

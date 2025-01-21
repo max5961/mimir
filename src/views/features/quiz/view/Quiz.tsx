@@ -94,28 +94,32 @@ export default function Quiz(): React.ReactNode {
                         </Box>
                     )}
                     <Box minHeight={11} width="100">
-                        <List
-                            listView={listView}
-                            flexDirection="column"
-                            justifyContent="center"
-                            alignItems="center"
-                            scrollbar={{ hide: true }}
-                            fitY
-                        >
-                            {questions.map((question) => {
-                                return (
-                                    <DynamicQuestionView
-                                        key={`${question.id}`}
-                                        question={question}
-                                    ></DynamicQuestionView>
-                                );
-                            })}
-                            <Finale
-                                goToStart={() => {
-                                    control.goToIndex(0);
-                                }}
-                            />
-                        </List>
+                        {questions.length ? (
+                            <List
+                                listView={listView}
+                                flexDirection="column"
+                                justifyContent="center"
+                                alignItems="center"
+                                scrollbar={{ hide: true }}
+                                fitY
+                            >
+                                {questions.map((question) => {
+                                    return (
+                                        <DynamicQuestionView
+                                            key={`${question.id}`}
+                                            question={question}
+                                        ></DynamicQuestionView>
+                                    );
+                                })}
+                                <Finale
+                                    goToStart={() => {
+                                        control.goToIndex(0);
+                                    }}
+                                />
+                            </List>
+                        ) : (
+                            <Text>Add some questions first (2)</Text>
+                        )}
                     </Box>
                     <QuizStats />
                 </Box>

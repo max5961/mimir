@@ -5,6 +5,8 @@ export function shuffle<T extends { id: string } = { id: string }>(
     cycles = 25,
     originalDeck: T[] | null = null,
 ) {
+    if (deck.length <= 2) return deck;
+
     originalDeck = originalDeck ?? deck;
 
     if (!cycles) {

@@ -1,6 +1,6 @@
 {
     "name": "@mmorrissey5961/mimir",
-    "version": "1.0.7",
+    "version": "1.1.1",
     "description": "",
     "main": "dist/root.js",
     "scripts": {
